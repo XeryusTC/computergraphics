@@ -16,6 +16,7 @@
 #include "object.h"
 #include "sphere.h"
 #include "plane.h"
+#include "cylinder.h"
 #include "material.h"
 #include "light.h"
 #include "image.h"
@@ -76,7 +77,15 @@ Object* Raytracer::parseObject(const YAML::Node& node)
         node["normal"] >> normal;
         Plane *plane = new Plane(pos, normal);
         returnObject = plane;
-    }
+    } else if (objectType == "cylinder") {
+		Point pos;
+		double r, h;
+		node["position"] >> pos;
+		node["radius"] >> r;
+		node["height"] >> h;
+		Cylinder *c = new Cylinder(pos, r, h);
+		returnObject = c;
+	}
 
     if (returnObject) {
         // read the material and attach to object
