@@ -40,7 +40,7 @@ Color Scene::trace(const Ray &ray)
 
     switch (mode) {
     case PHONG:
-        return renderPhong(material, hit, N, V);
+        return renderPhong(material, hit, N, V, ray, min_hit.t);
     case ZBUFFER:
         return renderZBuffer(hit);
     case NORMAL:
@@ -49,13 +49,31 @@ Color Scene::trace(const Ray &ray)
     return Color(0.0, 0.0, 0.0);
 }
 
-Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V)
+Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V, Ray orgray, double t)
 {
-    Color color;
+    Color color = Color(0.0f);
     Vector L, R;
+	Point i;
+	bool hashit;
     for (std::vector<Light*>::iterator it=lights.begin(); it!=lights.end(); ++it) {
+		hashit = false;
         // Ambient
         color += (*it)->color * m->color * m->ka;
+
+		// Detect shadows
+		if (shadows) {
+			i = orgray.at(t - shadow_offset);
+			Ray shadowray(i, ((*it)->position - i).normalized());
+			for (std::vector<Object*>::iterator jt=objects.begin(); jt!=objects.end(); ++jt) {
+				if ((*jt)->intersect(shadowray).t <= std::numeric_limits<double>::infinity()) {
+					hashit = true;
+					break;
+				}
+			}
+		}
+		if (hashit)
+			continue;
+
         // Diffusion
         L = (*it)->position - hit;
         L.normalize();
@@ -143,5 +161,10 @@ void Scene::setEye(Triple e)
 void Scene::setMode(RENDER_MODE m)
 {
     mode = m;
+}
+
+void Scene::setShadows(bool s)
+{
+	shadows = s;
 }
 

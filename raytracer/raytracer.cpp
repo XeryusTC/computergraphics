@@ -147,6 +147,15 @@ bool Raytracer::readScene(const std::string& inputFilename)
                 scene->setMode(PHONG);
             }
 
+			// Read shadow usage
+			try {
+				bool shadows;
+				doc["Shadows"] >> shadows;
+				scene->setShadows(shadows);
+			} catch (YAML::TypedKeyNotFound<std::string> &e) {
+				scene->setShadows(false);
+			}
+
             // Read scene configuration options
             scene->setEye(parseTriple(doc["Eye"]));
 
