@@ -19,6 +19,16 @@ Lights:
   color: [1.0,1.0,1.0]
 
 Objects:
+- type: cylinder
+  position: [200,100,300]
+  radius: 50
+  height: 10
+  material:
+    color: [1.0,0.0,1.0]
+    ka: 0.2
+    kd: 0.8
+    ks: 0.8
+    n: 32
 - type: sphere
   position: [90,320,100]
   radius: 50
@@ -64,6 +74,7 @@ Objects:
     kd: 0.8
     ks: 0.5
     n: 32
+    n: 32 
 - type: plane
   position: [300,200,0]
   normal: [0.2,.8,0.5]
