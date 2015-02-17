@@ -24,7 +24,7 @@ Objects:
   radius: 50
   height: 10
   material:
-    color: [0.0,1.0,1.0]
+    color: [1.0,0.0,1.0]
     ka: 0.2
     kd: 0.8
     ks: 0.8
@@ -75,3 +75,21 @@ Objects:
     ks: 0.5
     n: 32
     n: 32 
+- type: plane
+  position: [300,200,0]
+  normal: [0.2,.8,0.5]
+  material: # cyan
+    color: [0.0,0.8,0.8]
+    ka: 0.2
+    kd: 0.8
+    ks: 0.5
+    n: 32
+- type: plane
+  position: [500, 350, 500]
+  normal: [-.5,-.7,.2]
+  material: # magenta
+    color: [1.0, 1.0, 0.0]
+    ka: 0.2
+    kd: 0.7
+    ks: 0.5
+    n: 64
