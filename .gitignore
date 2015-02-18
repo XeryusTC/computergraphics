@@ -34,3 +34,13 @@ ray
 
 # program output
 *.png
+
+# LaTeX
+*.aux
+*.log
+*.nav
+*.pdf
+*.snm
+*.synctex.gz
+*.toc
+*.pdf
