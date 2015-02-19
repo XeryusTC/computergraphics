@@ -30,9 +30,13 @@
 #endif
 
 
-
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+/* CONSTANTS */
+const float rotscale=.5;
+const float PI=3.141592654;
 
 GLfloat cubeVertices[8*3] = {-1,-1,-1, -1,-1, 1, -1, 1,-1,  1,-1,-1, -1, 1, 1,  1,-1, 1,  1, 1,-1,  1, 1, 1};
 GLubyte cubeIndices[2*12] = {
@@ -56,6 +60,8 @@ GLfloat cubeFaceColors[3*8] = {
 int lastx=0, lasty=0;
 int leftmousedown=0, rightmousedown=0;
 
+float rotx=0, roty=0;
+
 
 void display(void)
 {
@@ -63,7 +69,14 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glColor3f(0.0f,0.0f,1.0f);
     glLoadIdentity();
-    gluLookAt(0.0,0.0,5.0,0.0,0.0,0.0,0.0,1.0,0.0);
+    gluLookAt(0.0, 0.0, 5.0,
+			  0.0, 0.0, 0.0,
+			  0.0, 1.0, 0.0);
+
+	// Set rotation
+	glMatrixMode(GL_MODELVIEW);
+	glRotatef(rotx, 1.0, 0.0, 0.0);
+	glRotatef(roty, 0.0, 1.0, 0.0);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
@@ -125,6 +138,9 @@ void passiveMotion(int x, int y)
 {
     int dx, dy;
     mouseDelta(x, y, &dx, &dy);
+	// Moving mouse in x direction rotates around y axis
+	roty += dx * rotscale;
+	rotx += dy * rotscale;
 }
 
 int main(int argc, char** argv)
