@@ -53,6 +53,8 @@ GLfloat cubeFaceColors[3*8] = {
     1,0,1, 1,1,0, 1,1,1, .5,.5,.5,
 };
 
+int lastx=0, lasty=0;
+int leftmousedown=0, rightmousedown=0;
 
 
 void display(void)
@@ -77,6 +79,7 @@ void display(void)
 
 
     glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 void keyboard(unsigned char key, int x, int y)
@@ -98,6 +101,30 @@ void reshape(int w, int h)
     glLoadIdentity();
     gluPerspective(60.0,(GLdouble)w/(GLdouble)h,1.5,20.0);
     glMatrixMode(GL_MODELVIEW);
+}
+
+void mouseDelta(int x, int y, int *dx, int *dy)
+{
+    *dx = x - lastx;
+    *dy = y - lasty;
+    lastx = x;
+    lasty = y;
+}
+
+void mouse(int button, int state, int x, int y)
+{
+}
+
+void motion(int x, int y)
+{
+    int dx, dy;
+    mouseDelta(x, y, &dx, &dy);
+}
+
+void passiveMotion(int x, int y)
+{
+    int dx, dy;
+    mouseDelta(x, y, &dx, &dy);
 }
 
 int main(int argc, char** argv)
@@ -133,6 +160,9 @@ int main(int argc, char** argv)
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
     glutReshapeFunc(reshape);
+    glutMouseFunc(mouse);
+    glutMotionFunc(motion);
+    glutPassiveMotionFunc(passiveMotion);
 
 
     glutMainLoop();
