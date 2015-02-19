@@ -33,6 +33,16 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+#define TRUE 1
+#define FALSE 0
+
+typedef enum CONTROL_MODE {
+	MODE_ROTATE_CLICK,
+	MODE_ROTATE_PASSIVE,
+	MODE_FPS,
+} CONTROL_MODE;
 
 /* CONSTANTS */
 const float rotscale=.5;
@@ -61,7 +71,7 @@ int lastx=0, lasty=0;
 int leftmousedown=0, rightmousedown=0;
 
 float rotx=0, roty=0;
-
+CONTROL_MODE rotate_mode;
 
 void display(void)
 {
@@ -126,21 +136,33 @@ void mouseDelta(int x, int y, int *dx, int *dy)
 
 void mouse(int button, int state, int x, int y)
 {
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		leftmousedown = TRUE;
+	} else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+		leftmousedown = FALSE;
+	}
 }
 
 void motion(int x, int y)
 {
     int dx, dy;
     mouseDelta(x, y, &dx, &dy);
+	if (rotate_mode == MODE_ROTATE_CLICK && leftmousedown) {
+		// Moving mouse in x direction rotates around y axis
+		roty += dx * rotscale;
+		rotx += dy * rotscale;
+	}
 }
 
 void passiveMotion(int x, int y)
 {
     int dx, dy;
     mouseDelta(x, y, &dx, &dy);
-	// Moving mouse in x direction rotates around y axis
-	roty += dx * rotscale;
-	rotx += dy * rotscale;
+	if (rotate_mode == MODE_ROTATE_PASSIVE) {
+		// Moving mouse in x direction rotates around y axis
+		roty += dx * rotscale;
+		rotx += dy * rotscale;
+	}
 }
 
 int main(int argc, char** argv)
@@ -149,7 +171,21 @@ int main(int argc, char** argv)
     GLenum err;
 #endif
 
+	// Set default options
+	rotate_mode = MODE_ROTATE_PASSIVE;
+	// Parse command line arguments
+	int i;
+	for (i=1; i<argc; ++i) {
+		if (strcmp(argv[i], "-c")==0 || strcmp(argv[i], "--click")==0) {
+			rotate_mode = MODE_ROTATE_CLICK;
+		} else if (strcmp(argv[i], "-f")==0 || strcmp(argv[i], "--fps")==0) {
+			rotate_mode = MODE_FPS;
+		} else if (strcmp(argv[i], "-p")==0 || strcmp(argv[i], "--passive")==0) {
+			rotate_mode = MODE_ROTATE_PASSIVE;
+		}
+	}
 
+	// Create window
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(800,600);
