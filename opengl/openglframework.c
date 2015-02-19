@@ -9,7 +9,7 @@
 #endif
 
 // If you use GLUT you do not need to include gl.h and glu.h
-// as glut.h guarantees that gl.h and glu.h are properly 
+// as glut.h guarantees that gl.h and glu.h are properly
 // included.
 // So if you do not wish to use  glut.h, uncomment the following lines.
 //#include <GL/gl.h>
@@ -40,8 +40,20 @@ GLubyte cubeIndices[2*12] = {
         1,4, 1,5, 2,4, 2,6, 3,5, 3,6, /* From two minusses to one minus */
         4,7, 5,7, 6,7                 /* From one minus to zero minusses */
     };
+GLubyte cubeFaces[3*12] = {
+        0,2,1, 4,2,1, // left face
+        3,5,7, 3,6,7, // right face
+        0,1,5, 0,3,5, // bottom face
+        4,2,6, 7,4,6, // top face
+        2,0,3, 2,6,3, // back face
+        5,1,4, 5,7,4, // front face
+    };
+GLfloat cubeFaceColors[3*8] = {
+    0,0,1, 0,1,0, 0,1,1, 1,0,0,
+    1,0,1, 1,1,0, 1,1,1, .5,.5,.5,
+};
 
- 
+
 
 void display(void)
 {
@@ -52,13 +64,16 @@ void display(void)
     gluLookAt(0.0,0.0,5.0,0.0,0.0,0.0,0.0,1.0,0.0);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
+    glColorPointer( 3, GL_FLOAT, 0, cubeFaceColors);
 
 	// draw a cube
-	glDrawElements(GL_LINES, 24, GL_UNSIGNED_BYTE, cubeIndices);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, cubeFaces);
 
 	// deactivate vertex arrays after drawing
 	glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
 
 
     glutSwapBuffers();
