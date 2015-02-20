@@ -177,6 +177,10 @@ int main(int argc, char** argv)
 		glutDisplayFunc(displayScene01);
 		glutReshapeFunc(reshapeScene01);
 
+		// Setup light
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+
 		// Setup camera
 		cam.x = 200.0;
 		cam.y = 200.0;
