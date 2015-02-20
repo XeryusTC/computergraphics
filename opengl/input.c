@@ -59,13 +59,16 @@ void keyboard(unsigned char key, int x, int y)
 			cameraMoveRight(&cam, walkspeed);
 			break;
 		case 's': case 'S':
-			cameraMoveBackward(&cam, walkspeed);
+			if (rotate_mode == MODE_FPS)
+				cameraMoveBackward(&cam, walkspeed);
 			break;
 		case 'w': case 'W':
-			cameraMoveForward(&cam, walkspeed);
+			if (rotate_mode == MODE_FPS)
+				cameraMoveForward(&cam, walkspeed);
 			break;
 		case 'e': case 'E':
-			cameraMoveUp(&cam, walkspeed);
+			if (rotate_mode == MODE_FPS)
+				cameraMoveUp(&cam, walkspeed);
 			break;
         case 'q': case 'Q':
 			// use Q to move up in FPS mode
