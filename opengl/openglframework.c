@@ -34,10 +34,9 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef enum bool {
-	FALSE = 0,
-	TRUE = 1,
-} bool;
+#include "bool.h"
+#include "camera.h"
+#include "input.h"
 
 typedef enum CONTROL_MODE {
 	MODE_ROTATE_CLICK,
@@ -46,19 +45,12 @@ typedef enum CONTROL_MODE {
 } CONTROL_MODE;
 
 /* CONSTANTS */
-const float PI=3.141592654;
-const float TORAD=3.141592654/180.0;
 const float rotscale=.5;
 const float fpsrotscale=.5;
 const float zoomdelta=.1;
 const float walkspeed=.1;
 
 GLfloat cubeVertices[8*3] = {-1,-1,-1, -1,-1, 1, -1, 1,-1,  1,-1,-1, -1, 1, 1,  1,-1, 1,  1, 1,-1,  1, 1, 1};
-GLubyte cubeIndices[2*12] = {
-        0,1, 0,2, 0,3,                /* From three minusses to two minusses */
-        1,4, 1,5, 2,4, 2,6, 3,5, 3,6, /* From two minusses to one minus */
-        4,7, 5,7, 6,7                 /* From one minus to zero minusses */
-    };
 GLubyte cubeFaces[3*12] = {
         0,2,1, 4,2,1, // left face
         3,5,7, 3,6,7, // right face
@@ -67,41 +59,25 @@ GLubyte cubeFaces[3*12] = {
         2,0,3, 2,6,3, // back face
         5,1,4, 5,7,4, // front face
     };
-GLfloat cubeFaceColors[3*8] = {
-    0,0,1, 0,1,0, 0,1,1, 1,0,0,
-    1,0,1, 1,1,0, 1,1,1, .5,.5,.5,
-};
+GLfloat cubeFaceColors[3*8] = {0,0,1, 0,1,0, 0,1,1, 1,0,0, 1,0,1, 1,1,0, 1,1,1, .5,.5,.5};
 
-int lastx=0, lasty=0;
-bool leftmousedown=FALSE, rightmousedown=TRUE;
+MouseInfo mouse;
 
 CONTROL_MODE rotate_mode;
 float rotx=0, roty=0;
-float zoomlevel=5.0;
-float campos[3]; // x, y, z position
-float camrot[3]; // yaw, pitch, roll
+Camera cam;
 
 void display(void)
 {
+	float x, y, z;
     /* Clear all pixels */
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glColor3f(0.0f,0.0f,1.0f);
     glLoadIdentity();
-	if (rotate_mode == MODE_FPS) {
-		// Calculate direction to look in
-		float xlook, ylook, zlook;
-		xlook = sin(camrot[0] * TORAD);
-		ylook = sin(camrot[1] * TORAD);
-		zlook = sin((camrot[0] + 90) * TORAD);
-
-		gluLookAt(campos[0], campos[1], campos[2],
-		          campos[0]+xlook, campos[1]+ylook, campos[2]+zlook,
-				  0.0, 1.0, 0.0);
-	} else {
-	    gluLookAt(0.0, 0.0, zoomlevel,
-		          0.0, 0.0, 0.0,
-		          0.0, 1.0, 0.0);
-	}
+	cameraLookDirVector(cam, &x, &y, &z);
+	gluLookAt(cam.x, cam.y, cam.z,
+	          cam.x+x, cam.y+y, cam.z+z,
+			  0.0, 1.0, 0.0);
 
 	// Set rotation
 	glMatrixMode(GL_MODELVIEW);
@@ -120,7 +96,6 @@ void display(void)
 	glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
 
-
     glutSwapBuffers();
     glutPostRedisplay();
 }
@@ -129,30 +104,24 @@ void keyboard(unsigned char key, int x, int y)
 {
     switch (key) {
 		case 'a': case 'A':
-			campos[0] += walkspeed * cos(camrot[0] * TORAD);
-			campos[2] -= walkspeed * sin(camrot[0] * TORAD);
+			cameraMoveLeft(&cam, walkspeed);
 			break;
 		case 'd': case 'D':
-			campos[0] -= walkspeed * cos(camrot[0] * TORAD);
-			campos[2] += walkspeed * sin(camrot[0] * TORAD);
+			cameraMoveRight(&cam, walkspeed);
 			break;
 		case 's': case 'S':
-			campos[0] -= walkspeed * sin(camrot[0] * TORAD) * cos(camrot[1] * TORAD);
-			campos[1] -= walkspeed * sin(camrot[1] * TORAD);
-			campos[2] -= walkspeed * cos(camrot[0] * TORAD) * cos(camrot[1] * TORAD);
+			cameraMoveBackward(&cam, walkspeed);
 			break;
 		case 'w': case 'W':
-			campos[0] += walkspeed * sin(camrot[0] * TORAD) * cos(camrot[1] * TORAD);
-			campos[1] += walkspeed * sin(camrot[1] * TORAD);
-			campos[2] += walkspeed * cos(camrot[0] * TORAD) * cos(camrot[1] * TORAD);
+			cameraMoveForward(&cam, walkspeed);
 			break;
 		case 'e': case 'E':
-			campos[1] -= walkspeed;
+			cameraMoveDown(&cam, walkspeed);
 			break;
         case 'q': case 'Q':
 			// use Q to move up in FPS mode
 			if (rotate_mode == MODE_FPS) {
-				campos[1] += walkspeed;
+				cameraMoveUp(&cam, walkspeed);
 				break;
 			}
 			// use Q to exit when not in FPS mode
@@ -172,31 +141,15 @@ void reshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
-void mouseDelta(int x, int y, int *dx, int *dy)
-{
-	static bool firstrun=TRUE;
-	if (firstrun) {
-		*dx = 0;
-		*dy = 0;
-		firstrun = FALSE;
-	} else {
-	    *dx = x - lastx;
-    	*dy = y - lasty;
-	}
-    lastx = x;
-    lasty = y;
-}
 
-void mouse(int button, int state, int x, int y)
+void mouseCallback(int button, int state, int x, int y)
 {
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		leftmousedown = TRUE;
-	} else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-		leftmousedown = FALSE;
+	if (button == GLUT_LEFT_BUTTON) {
+		mouse.leftDown = (state == GLUT_DOWN);
 	} else if (button == 3 && rotate_mode != MODE_FPS) {
-		zoomlevel -= zoomdelta;
+		cameraMoveForward(&cam, zoomdelta);
 	} else if (button == 4 && rotate_mode != MODE_FPS) {
-		zoomlevel += zoomdelta;
+		cameraMoveBackward(&cam, zoomdelta);
 	} else {
 		printf("Unhandled mouse event: %d %d %d %d\n", button, state, x, y);
 	}
@@ -205,8 +158,8 @@ void mouse(int button, int state, int x, int y)
 void motion(int x, int y)
 {
     int dx, dy;
-    mouseDelta(x, y, &dx, &dy);
-	if (rotate_mode == MODE_ROTATE_CLICK && leftmousedown) {
+    mouseDelta(&mouse, x, y, &dx, &dy);
+	if (rotate_mode == MODE_ROTATE_CLICK && mouse.leftDown) {
 		// Moving mouse in x direction rotates around y axis
 		roty += dx * rotscale;
 		rotx += dy * rotscale;
@@ -216,14 +169,14 @@ void motion(int x, int y)
 void passiveMotion(int x, int y)
 {
     int dx, dy;
-    mouseDelta(x, y, &dx, &dy);
+    mouseDelta(&mouse, x, y, &dx, &dy);
 	if (rotate_mode == MODE_ROTATE_PASSIVE) {
 		// Moving mouse in x direction rotates around y axis
 		roty += dx * rotscale;
 		rotx += dy * rotscale;
 	} else if (rotate_mode == MODE_FPS) {
-		camrot[0] -= dx * fpsrotscale;
-		camrot[1] += dy * fpsrotscale;
+		cam.yaw   -= dx * fpsrotscale;
+		cam.pitch += dy * fpsrotscale;
 	}
 }
 
@@ -245,15 +198,6 @@ int main(int argc, char** argv)
 		} else if (strcmp(argv[i], "-p")==0 || strcmp(argv[i], "--passive")==0) {
 			rotate_mode = MODE_ROTATE_PASSIVE;
 		}
-	}
-
-	if (rotate_mode == MODE_FPS) {
-		campos[0] = 0.0;
-		campos[1] = 0.0;
-		campos[2] = 5.0;
-		camrot[0] = 180.0;
-		camrot[1] = 0.0;
-		camrot[2] = 0.0;
 	}
 
 	// Create window
@@ -283,10 +227,19 @@ int main(int argc, char** argv)
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
     glutReshapeFunc(reshape);
-    glutMouseFunc(mouse);
+    glutMouseFunc(mouseCallback);
     glutMotionFunc(motion);
     glutPassiveMotionFunc(passiveMotion);
 
+	// Setup camera
+	cam.x = 0.0;
+	cam.y = 0.0;
+	cam.z = 5.0;
+	cam.pitch = 0.0;
+	cam.yaw = 180.0;
+	cam.roll = 0.0;
+
+	mouse.calculateDelta=false;
 
     glutMainLoop();
 
