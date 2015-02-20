@@ -38,18 +38,7 @@
 #include "camera.h"
 #include "input.h"
 
-typedef enum CONTROL_MODE {
-	MODE_ROTATE_CLICK,
-	MODE_ROTATE_PASSIVE,
-	MODE_FPS,
-} CONTROL_MODE;
-
 /* CONSTANTS */
-const float rotscale=.5;
-const float fpsrotscale=.5;
-const float zoomdelta=.1;
-const float walkspeed=.1;
-
 GLfloat cubeVertices[8*3] = {-1,-1,-1, -1,-1, 1, -1, 1,-1,  1,-1,-1, -1, 1, 1,  1,-1, 1,  1, 1,-1,  1, 1, 1};
 GLubyte cubeFaces[3*12] = {
         0,2,1, 4,2,1, // left face
@@ -61,6 +50,7 @@ GLubyte cubeFaces[3*12] = {
     };
 GLfloat cubeFaceColors[3*8] = {0,0,1, 0,1,0, 0,1,1, 1,0,0, 1,0,1, 1,1,0, 1,1,1, .5,.5,.5};
 
+/* Globals galore */
 MouseInfo mouse;
 ScreenInfo screen;
 
@@ -106,38 +96,6 @@ void display(void)
 	}
 }
 
-void keyboard(unsigned char key, int x, int y)
-{
-    switch (key) {
-		case 'a': case 'A':
-			cameraMoveLeft(&cam, walkspeed);
-			break;
-		case 'd': case 'D':
-			cameraMoveRight(&cam, walkspeed);
-			break;
-		case 's': case 'S':
-			cameraMoveBackward(&cam, walkspeed);
-			break;
-		case 'w': case 'W':
-			cameraMoveForward(&cam, walkspeed);
-			break;
-		case 'e': case 'E':
-			cameraMoveDown(&cam, walkspeed);
-			break;
-        case 'q': case 'Q':
-			// use Q to move up in FPS mode
-			if (rotate_mode == MODE_FPS) {
-				cameraMoveUp(&cam, walkspeed);
-				break;
-			}
-			// use Q to exit when not in FPS mode
-        case 27: // ESC key
-            printf("Exiting...\n");
-            exit(0);
-            break;
-    }
-}
-
 void reshape(int w, int h)
 {
 	screen.width = w;
@@ -147,45 +105,6 @@ void reshape(int w, int h)
     glLoadIdentity();
     gluPerspective(60.0,(GLdouble)w/(GLdouble)h,1.5,20.0);
     glMatrixMode(GL_MODELVIEW);
-}
-
-
-void mouseCallback(int button, int state, int x, int y)
-{
-	if (button == GLUT_LEFT_BUTTON) {
-		mouse.leftDown = (state == GLUT_DOWN);
-	} else if (button == 3 && rotate_mode != MODE_FPS) {
-		cameraMoveForward(&cam, zoomdelta);
-	} else if (button == 4 && rotate_mode != MODE_FPS) {
-		cameraMoveBackward(&cam, zoomdelta);
-	} else {
-		printf("Unhandled mouse event: %d %d %d %d\n", button, state, x, y);
-	}
-}
-
-void motion(int x, int y)
-{
-    int dx, dy;
-    mouseDelta(&mouse, x, y, &dx, &dy);
-	if (rotate_mode == MODE_ROTATE_CLICK && mouse.leftDown) {
-		// Moving mouse in x direction rotates around y axis
-		roty += dx * rotscale;
-		rotx += dy * rotscale;
-	}
-}
-
-void passiveMotion(int x, int y)
-{
-    int dx, dy;
-    mouseDelta(&mouse, x, y, &dx, &dy);
-	if (rotate_mode == MODE_ROTATE_PASSIVE) {
-		// Moving mouse in x direction rotates around y axis
-		roty += dx * rotscale;
-		rotx += dy * rotscale;
-	} else if (rotate_mode == MODE_FPS) {
-		cam.yaw   -= dx * fpsrotscale;
-		cam.pitch += dy * fpsrotscale;
-	}
 }
 
 int main(int argc, char** argv)

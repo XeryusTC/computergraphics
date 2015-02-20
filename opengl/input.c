@@ -1,6 +1,27 @@
-#include "bool.h"
-#include "input.h"
+#if defined(__APPLE__)&& defined(__MACH__)
+	#include <GLUT/glut.h>
+#elif defined(_WIN32)
+	#include <GL/freeglut.h>
+#else
+	#include <GL/glut.h>
+#endif
+
 #include <stdio.h>
+#include <stdlib.h>
+#include "bool.h"
+#include "camera.h"
+#include "input.h"
+
+extern MouseInfo mouse;
+extern CONTROL_MODE rotate_mode;
+extern float rotx, roty;
+extern const float rotscale;
+extern Camera cam;
+
+const float walkspeed=.1;
+const float rotscale=.5;
+const float fpsrotscale=.5;
+const float zoomdelta=.1;
 
 void mouseDelta(MouseInfo *mouse, int x, int y, int *dx, int *dy)
 {
@@ -14,4 +35,74 @@ void mouseDelta(MouseInfo *mouse, int x, int y, int *dx, int *dy)
 	}
     mouse->lastx = x;
     mouse->lasty = y;
+}
+
+void motion(int x, int y)
+{
+    int dx, dy;
+    mouseDelta(&mouse, x, y, &dx, &dy);
+	if (rotate_mode == MODE_ROTATE_CLICK && mouse.leftDown) {
+		// Moving mouse in x direction rotates around y axis
+		roty += dx * rotscale;
+		rotx += dy * rotscale;
+	}
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+    switch (key) {
+		case 'a': case 'A':
+			cameraMoveLeft(&cam, walkspeed);
+			break;
+		case 'd': case 'D':
+			cameraMoveRight(&cam, walkspeed);
+			break;
+		case 's': case 'S':
+			cameraMoveBackward(&cam, walkspeed);
+			break;
+		case 'w': case 'W':
+			cameraMoveForward(&cam, walkspeed);
+			break;
+		case 'e': case 'E':
+			cameraMoveUp(&cam, walkspeed);
+			break;
+        case 'q': case 'Q':
+			// use Q to move up in FPS mode
+			if (rotate_mode == MODE_FPS) {
+				cameraMoveDown(&cam, walkspeed);
+				break;
+			}
+			// use Q to exit when not in FPS mode
+        case 27: // ESC key
+            printf("Exiting...\n");
+            exit(0);
+            break;
+    }
+}
+
+void mouseCallback(int button, int state, int x, int y)
+{
+	if (button == GLUT_LEFT_BUTTON) {
+		mouse.leftDown = (state == GLUT_DOWN);
+	} else if (button == 3 && rotate_mode != MODE_FPS) {
+		cameraMoveForward(&cam, zoomdelta);
+	} else if (button == 4 && rotate_mode != MODE_FPS) {
+		cameraMoveBackward(&cam, zoomdelta);
+	} else {
+		printf("Unhandled mouse event: %d %d %d %d\n", button, state, x, y);
+	}
+}
+
+void passiveMotion(int x, int y)
+{
+    int dx, dy;
+    mouseDelta(&mouse, x, y, &dx, &dy);
+	if (rotate_mode == MODE_ROTATE_PASSIVE) {
+		// Moving mouse in x direction rotates around y axis
+		roty += dx * rotscale;
+		rotx += dy * rotscale;
+	} else if (rotate_mode == MODE_FPS) {
+		cam.yaw   -= dx * fpsrotscale;
+		cam.pitch -= dy * fpsrotscale;
+	}
 }
