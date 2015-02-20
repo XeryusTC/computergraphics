@@ -13,4 +13,6 @@ void cameraMoveBackward(Camera *cam, float distance);
 void cameraMoveUp(Camera *cam, float distance);
 void cameraMoveDown(Camera *cam, float distance);
 
+void cameraLookAt(Camera cam);
+
 #endif // CAMERA_H

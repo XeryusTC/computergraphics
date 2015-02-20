@@ -22,6 +22,7 @@ void mouseDelta(MouseInfo *mouse, int x, int y, int *dx, int *dy);
 void mouseCallback(int button, int state, int x, int y);
 void motion(int x, int y);
 void passiveMotion(int x, int y);
+void resetMousePosition();
 
 /* KEYBOARD */
 void keyboard(unsigned char key, int x, int y);

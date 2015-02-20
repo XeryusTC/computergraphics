@@ -7,7 +7,7 @@ CC = gcc -g -Wall
 UNAME=$(shell uname)
 
 EXECUTABLE = openglframework
-OBJS = openglframework.o camera.o input.o
+OBJS = openglframework.o camera.o input.o scene01.o
 
 ifeq ($(UNAME),Darwin)
 	LIBS = -lm -framework OpenGL -framework GLUT

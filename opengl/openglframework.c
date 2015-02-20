@@ -37,6 +37,7 @@
 #include "bool.h"
 #include "camera.h"
 #include "input.h"
+#include "scene.h"
 
 /* CONSTANTS */
 GLfloat cubeVertices[8*3] = {-1,-1,-1, -1,-1, 1, -1, 1,-1,  1,-1,-1, -1, 1, 1,  1,-1, 1,  1, 1,-1,  1, 1, 1};
@@ -55,20 +56,16 @@ MouseInfo mouse;
 ScreenInfo screen;
 
 CONTROL_MODE rotate_mode;
+SCENE scene;
 float rotx=0, roty=0;
 Camera cam;
 
-void display(void)
+void displayDefault(void)
 {
-	float x, y, z;
     /* Clear all pixels */
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glColor3f(0.0f,0.0f,1.0f);
-    glLoadIdentity();
-	cameraLookDirVector(cam, &x, &y, &z);
-	gluLookAt(cam.x, cam.y, cam.z,
-	          cam.x+x, cam.y+y, cam.z+z,
-			  0.0, 1.0, 0.0);
+	cameraLookAt(cam);
 
 	// Set rotation
 	glMatrixMode(GL_MODELVIEW);
@@ -87,16 +84,14 @@ void display(void)
 	glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
 
+	if (rotate_mode == MODE_FPS)
+		resetMousePosition();
+
     glutSwapBuffers();
     glutPostRedisplay();
-
-	if (rotate_mode == MODE_FPS) {
-		mouse.calculateDelta=false;
-		glutWarpPointer(screen.width/2, screen.height/2);
-	}
 }
 
-void reshape(int w, int h)
+void reshapeDefault(int w, int h)
 {
 	screen.width = w;
 	screen.height = h;
@@ -115,9 +110,13 @@ int main(int argc, char** argv)
 
 	// Set default options
 	rotate_mode = MODE_ROTATE_CLICK;
+	scene = DEFAULT_SCENE;
+	screen.width=800;
+	screen.height=600;
 	// Parse command line arguments
 	int i;
 	for (i=1; i<argc; ++i) {
+		// Control modes
 		if (strcmp(argv[i], "-c")==0 || strcmp(argv[i], "--click")==0) {
 			rotate_mode = MODE_ROTATE_CLICK;
 		} else if (strcmp(argv[i], "-f")==0 || strcmp(argv[i], "--fps")==0) {
@@ -125,12 +124,18 @@ int main(int argc, char** argv)
 		} else if (strcmp(argv[i], "-p")==0 || strcmp(argv[i], "--passive")==0) {
 			rotate_mode = MODE_ROTATE_PASSIVE;
 		}
+		// Scene
+		else if (strcmp(argv[i], "-1")==0 || strcmp(argv[i], "--scene01")==0) {
+			scene = SCENE01;
+			screen.width=400;
+			screen.height=400;
+		}
 	}
 
 	// Create window
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(800,600);
+    glutInitWindowSize(screen.width, screen.height);
     glutInitWindowPosition(220,100);
     glutCreateWindow("Computer Graphics - OpenGL framework");
 	if (rotate_mode == MODE_FPS)
@@ -149,24 +154,43 @@ int main(int argc, char** argv)
 
     /* Select clearing (background) color */
     glClearColor(0.0,0.0,0.0,0.0);
-    glShadeModel(GL_FLAT);
     glEnable(GL_DEPTH_TEST);
 
     /* Register GLUT callback functions */
-    glutDisplayFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutReshapeFunc(reshape);
+	switch (scene) {
+	case DEFAULT_SCENE:
+    	glShadeModel(GL_FLAT);
+	    glutDisplayFunc(displayDefault);
+    	glutReshapeFunc(reshapeDefault);
+
+		// Setup camera
+		cam.x = 0.0;
+		cam.y = 0.0;
+		cam.z = 5.0;
+		cam.pitch = 0.0;
+		cam.yaw = 180.0;
+		cam.roll = 0.0;
+
+		break;
+	case SCENE01:
+    	glShadeModel(GL_SMOOTH);
+		glutDisplayFunc(displayScene01);
+		glutReshapeFunc(reshapeScene01);
+
+		// Setup camera
+		cam.x = 200.0;
+		cam.y = 200.0;
+		cam.z = 1000.0;
+		cam.pitch = 0.0;
+		cam.yaw = 180.0;
+		cam.roll = 0.0;
+		break;
+	}
+
+	glutKeyboardFunc(keyboard);
     glutMouseFunc(mouseCallback);
     glutMotionFunc(motion);
     glutPassiveMotionFunc(passiveMotion);
-
-	// Setup camera
-	cam.x = 0.0;
-	cam.y = 0.0;
-	cam.z = 5.0;
-	cam.pitch = 0.0;
-	cam.yaw = 180.0;
-	cam.roll = 0.0;
 
 	mouse.calculateDelta=false;
 

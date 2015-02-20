@@ -13,14 +13,15 @@
 #include "input.h"
 
 extern MouseInfo mouse;
+extern ScreenInfo screen;
 extern CONTROL_MODE rotate_mode;
 extern float rotx, roty;
 extern const float rotscale;
 extern Camera cam;
 
-const float walkspeed=.1;
+const float walkspeed=.5;
 const float rotscale=.5;
-const float fpsrotscale=.5;
+const float fpsrotscale=.2;
 const float zoomdelta=.1;
 
 void mouseDelta(MouseInfo *mouse, int x, int y, int *dx, int *dy)
@@ -105,4 +106,10 @@ void passiveMotion(int x, int y)
 		cam.yaw   -= dx * fpsrotscale;
 		cam.pitch -= dy * fpsrotscale;
 	}
+}
+
+void resetMousePosition()
+{
+	mouse.calculateDelta=false;
+	glutWarpPointer(screen.width/2, screen.height/2);
 }
