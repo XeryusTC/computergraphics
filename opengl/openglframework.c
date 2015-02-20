@@ -62,6 +62,7 @@ GLubyte cubeFaces[3*12] = {
 GLfloat cubeFaceColors[3*8] = {0,0,1, 0,1,0, 0,1,1, 1,0,0, 1,0,1, 1,1,0, 1,1,1, .5,.5,.5};
 
 MouseInfo mouse;
+ScreenInfo screen;
 
 CONTROL_MODE rotate_mode;
 float rotx=0, roty=0;
@@ -98,6 +99,11 @@ void display(void)
 
     glutSwapBuffers();
     glutPostRedisplay();
+
+	if (rotate_mode == MODE_FPS) {
+		mouse.calculateDelta=false;
+		glutWarpPointer(screen.width/2, screen.height/2);
+	}
 }
 
 void keyboard(unsigned char key, int x, int y)
@@ -134,6 +140,8 @@ void keyboard(unsigned char key, int x, int y)
 
 void reshape(int w, int h)
 {
+	screen.width = w;
+	screen.height = h;
     glViewport(0,0, (GLsizei) w, (GLsizei) h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -206,6 +214,8 @@ int main(int argc, char** argv)
     glutInitWindowSize(800,600);
     glutInitWindowPosition(220,100);
     glutCreateWindow("Computer Graphics - OpenGL framework");
+	if (rotate_mode == MODE_FPS)
+		glutSetCursor(GLUT_CURSOR_NONE);
 
 #if defined(NEED_GLEW)
     /* Init GLEW if needed */
