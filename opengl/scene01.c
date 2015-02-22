@@ -21,6 +21,9 @@ extern Camera cam;
 extern CONTROL_MODE rotate_mode;
 extern float rotx, roty;
 
+GLfloat light_pos[4] = {-200.0, 600.0, 1500.0, 0.0};
+GLfloat light_color[3] = {1.0, 1.0, 1.0};
+
 void setGlMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat ka, GLfloat kd, GLfloat ks, GLfloat n)
 {
     GLfloat ambient[] = {ka*r,ka*g,ka*b,1.0};
@@ -44,6 +47,12 @@ void displayScene01(void)
 	glRotatef(rotx, 1.0, 0.0, 0.0);
 	glRotatef(roty, 0.0, 1.0, 0.0);
 	glTranslatef(-200.0, -200.0, -200.0);
+
+	// Add light
+	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_color);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_color);
 
 	setGlMaterial(0.0f,0.0f,1.0f,0.2,0.7,0.5,64);
     glPushMatrix();
