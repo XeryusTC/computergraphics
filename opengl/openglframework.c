@@ -37,6 +37,7 @@
 #include "bool.h"
 #include "camera.h"
 #include "input.h"
+#include "glslshaders.h"
 #include "scene.h"
 
 /* CONSTANTS */
@@ -173,6 +174,7 @@ int main(int argc, char** argv)
 
 		break;
 	case SCENE01:
+		initGLSLProgram("vertexshader.glsl", "fragmentshader.glsl");
     	glShadeModel(GL_SMOOTH);
 		glutDisplayFunc(displayScene01);
 		glutReshapeFunc(reshapeScene01);
