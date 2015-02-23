@@ -22,7 +22,7 @@ extern Camera cam;
 const float walkspeed=.5;
 const float rotscale=.5;
 const float fpsrotscale=.2;
-const float zoomdelta=.1;
+const float zoomdelta=3;
 
 void mouseDelta(MouseInfo *mouse, int x, int y, int *dx, int *dy)
 {

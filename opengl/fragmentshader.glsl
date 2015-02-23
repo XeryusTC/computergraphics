@@ -1,4 +1,5 @@
 #version 120
+/* Code taken from http://www.ozone3d.net/tutorials/glsl_lighting_phong_p2.php */
 
 varying vec3 N, lightDir, eyeVec;
 
