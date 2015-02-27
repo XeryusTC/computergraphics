@@ -156,6 +156,16 @@ bool Raytracer::readScene(const std::string& inputFilename)
 				scene->setShadows(false);
 			}
 
+            // Read recursion depth
+            try {
+                unsigned int depth;
+                doc["MaxRecursionDepth"] >> depth;
+                scene->setRecursionDepth(depth);
+            } catch (YAML::TypedKeyNotFound<std::string> &e) {
+                cout << "Using default ray recursion depth\n";
+                scene->setRecursionDepth(0);
+            }
+
             // Read scene configuration options
             scene->setEye(parseTriple(doc["Eye"]));
 

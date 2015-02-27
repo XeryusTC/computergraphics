@@ -17,8 +17,11 @@
 #include "scene.h"
 #include "material.h"
 
-Color Scene::trace(const Ray &ray)
+Color Scene::trace(const Ray &ray, unsigned int depth)
 {
+    if (depth > maxRecursionDepth)
+        return Color(0.0);
+
     // Find hit object and distance
     Hit min_hit(std::numeric_limits<double>::infinity(),Vector());
     Object *obj = NULL;
@@ -40,7 +43,7 @@ Color Scene::trace(const Ray &ray)
 
     switch (mode) {
     case PHONG:
-        return renderPhong(material, hit, N, V, ray, min_hit.t);
+        return renderPhong(material, hit, N, V, ray, min_hit.t, depth);
     case ZBUFFER:
         return renderZBuffer(hit);
     case NORMAL:
@@ -49,20 +52,30 @@ Color Scene::trace(const Ray &ray)
     return Color(0.0, 0.0, 0.0);
 }
 
-Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V, Ray orgray, double t)
+Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
+        Ray orgray, double t, unsigned int depth)
 {
-    Color color = Color(0.0f);
+    Color color = Color(0.0f), reflectColor = Color(0.0f);
     Vector L, R;
-	Point i;
+	Point i= orgray.at(t - RECAST_OFFSET);
 	bool hashit;
+
+    // Reflection
+    R = 2 * N.dot(V) * N - V;
+    R.normalize();
+    Ray reflectRay = Ray(i, R);
+    reflectColor = trace(reflectRay, depth+1);
+    if (reflectColor.r || reflectColor.g || reflectColor.b)
+        color += reflectColor * m->ks;
+
     for (std::vector<Light*>::iterator it=lights.begin(); it!=lights.end(); ++it) {
 		hashit = false;
+
         // Ambient
         color += (*it)->color * m->color * m->ka;
 
 		// Detect shadows
 		if (shadows) {
-			i = orgray.at(t - shadow_offset);
 			Ray shadowray(i, ((*it)->position - i).normalized());
 			for (std::vector<Object*>::iterator jt=objects.begin(); jt!=objects.end(); ++jt) {
 				if ((*jt)->intersect(shadowray).t <= std::numeric_limits<double>::infinity()) {
@@ -166,5 +179,10 @@ void Scene::setMode(RENDER_MODE m)
 void Scene::setShadows(bool s)
 {
 	shadows = s;
+}
+
+void Scene::setRecursionDepth(unsigned int d)
+{
+    maxRecursionDepth = d;
 }
 

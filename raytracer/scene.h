@@ -31,7 +31,7 @@ typedef enum RENDER_MODE {
 
 // Cast shadow ray a bit above surface to prevent from detecting the surface
 // being between itself and the light source
-const double shadow_offset = 0.0000000001;
+const double RECAST_OFFSET = 0.0000000001;
 
 class Scene
 {
@@ -40,20 +40,23 @@ private:
     std::vector<Light*> lights;
     Triple eye;
 	bool shadows;
+    unsigned int maxRecursionDepth;
 
     // Change the render mode
     RENDER_MODE mode;
-    Color renderPhong(Material *m, Point hit, Vector N, Vector V, Ray orgray, double t);
+    Color renderPhong(Material *m, Point hit, Vector N, Vector V, Ray orgray,
+            double t, unsigned int depth);
     Color renderZBuffer(Point hit);
     Color renderNormal(Vector N);
 public:
-    Color trace(const Ray &ray);
+    Color trace(const Ray &ray, unsigned int depth=0);
     void render(Image &img);
     void addObject(Object *o);
     void addLight(Light *l);
     void setEye(Triple e);
     void setMode(RENDER_MODE m);
 	void setShadows(bool s);
+    void setRecursionDepth(unsigned int d);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 };
