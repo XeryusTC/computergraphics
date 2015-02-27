@@ -166,6 +166,17 @@ bool Raytracer::readScene(const std::string& inputFilename)
                 scene->setRecursionDepth(0);
             }
 
+            // Read supersampling settings
+            try {
+                const YAML::Node& superSampling = doc["SuperSampling"];
+                unsigned int factor;
+                superSampling["factor"] >> factor;
+                scene->setSuperSampling(factor);
+            } catch (YAML::TypedKeyNotFound<std::string> &e) {
+                cout << "Setting default supersampling level\n";
+                scene->setSuperSampling(1);
+            }
+
             // Read scene configuration options
             scene->setEye(parseTriple(doc["Eye"]));
 

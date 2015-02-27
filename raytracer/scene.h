@@ -41,6 +41,7 @@ private:
     Triple eye;
 	bool shadows;
     unsigned int maxRecursionDepth;
+    float SSFactor;
 
     // Change the render mode
     RENDER_MODE mode;
@@ -57,6 +58,7 @@ public:
     void setMode(RENDER_MODE m);
 	void setShadows(bool s);
     void setRecursionDepth(unsigned int d);
+    void setSuperSampling(unsigned int factor);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 };
