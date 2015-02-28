@@ -41,7 +41,7 @@ private:
     Triple eye;
 	bool shadows;
     unsigned int maxRecursionDepth;
-    float SSFactor;
+    int SSFactor;
 
     // Change the render mode
     RENDER_MODE mode;

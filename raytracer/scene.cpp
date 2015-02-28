@@ -120,12 +120,19 @@ void Scene::render(Image &img)
     int w = img.width();
     int h = img.height();
     float colorFactor = 1.0/(SSFactor * SSFactor);
-    for (int y = 0; y < (h * SSFactor); y++) {
-        for (int x = 0; x < (w * SSFactor); x++) {
-            Point pixel((x+0.5) / SSFactor, (h*SSFactor-1-y + 0.5)/SSFactor, 0);
-            Ray ray(eye, (pixel-eye).normalized());
-            Color col = trace(ray);
-            img(x/SSFactor, y/SSFactor) += col * colorFactor;
+    int p, q;
+    Color c;
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            c = Color(0.0f);
+            for (p=0; p<SSFactor; ++p) {
+                for (q=0; q<SSFactor; ++q) {
+                    Point pixel(x+ (p+0.5) / (float)SSFactor, h-1-y +(q+0.5)/(float)SSFactor, 0);
+                    Ray ray(eye, (pixel-eye).normalized());
+                    c += trace(ray);
+                }
+            }
+            img(x, y) = c / (float)(SSFactor * SSFactor);
         }
     }
 
@@ -189,5 +196,5 @@ void Scene::setRecursionDepth(unsigned int d)
 
 void Scene::setSuperSampling(unsigned int factor)
 {
-    SSFactor = (float)factor;
+    SSFactor = factor;
 }
