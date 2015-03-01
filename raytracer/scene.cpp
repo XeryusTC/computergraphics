@@ -115,20 +115,25 @@ Color Scene::renderNormal(Vector N)
     return Color(C.x, C.y, C.z);
 }
 
-void Scene::render(Image &img)
+Image Scene::render()
 {
+	Image img = camera->getImage();
     int w = img.width();
     int h = img.height();
-    float colorFactor = 1.0/(SSFactor * SSFactor);
     int p, q;
+	float px, py, pz;
     Color c;
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             c = Color(0.0f);
             for (p=0; p<SSFactor; ++p) {
                 for (q=0; q<SSFactor; ++q) {
-                    Point pixel(x+ (p+0.5) / (float)SSFactor, h-1-y +(q+0.5)/(float)SSFactor, 0);
-                    Ray ray(eye, (pixel-eye).normalized());
+					px = (x - (w/2) + ((p+0.5)/(float)SSFactor)) * camera->up.length();
+					py = ((h/2)-1 - y + ((q+0.5)/(float)SSFactor)) * camera->up.length();
+					Point pixel(camera->centre.x + px,
+							camera->centre.y + py,
+							camera->centre.z);
+                    Ray ray(camera->position, (pixel-camera->position).normalized());
                     c += trace(ray);
                 }
             }
@@ -162,6 +167,7 @@ void Scene::render(Image &img)
             img(x,y) = col;
         }
     }
+	return img;
 }
 
 void Scene::addObject(Object *o)
@@ -197,4 +203,9 @@ void Scene::setRecursionDepth(unsigned int d)
 void Scene::setSuperSampling(unsigned int factor)
 {
     SSFactor = factor;
+}
+
+void Scene::setCamera(Camera *c)
+{
+	camera = c;
 }

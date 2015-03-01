@@ -22,6 +22,7 @@
 #include "light.h"
 #include "object.h"
 #include "image.h"
+#include "camera.h"
 
 typedef enum RENDER_MODE {
     PHONG,
@@ -42,6 +43,7 @@ private:
 	bool shadows;
     unsigned int maxRecursionDepth;
     int SSFactor;
+	Camera* camera;
 
     // Change the render mode
     RENDER_MODE mode;
@@ -51,7 +53,7 @@ private:
     Color renderNormal(Vector N);
 public:
     Color trace(const Ray &ray, unsigned int depth=0);
-    void render(Image &img);
+    Image render();
     void addObject(Object *o);
     void addLight(Light *l);
     void setEye(Triple e);
@@ -59,6 +61,7 @@ public:
 	void setShadows(bool s);
     void setRecursionDepth(unsigned int d);
     void setSuperSampling(unsigned int factor);
+	void setCamera(Camera *c);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 };

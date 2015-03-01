@@ -22,6 +22,7 @@
 #include "light.h"
 #include "image.h"
 #include "yaml/yaml.h"
+#include "camera.h"
 #include <ctype.h>
 #include <fstream>
 #include <assert.h>
@@ -112,6 +113,26 @@ Light* Raytracer::parseLight(const YAML::Node& node)
     return new Light(position,color);
 }
 
+Camera* Raytracer::parseCamera(const YAML::Node& node)
+{
+	Point p, c;
+	Vector u;
+	int width, height;
+	node["eye"] >> p;
+	node["center"] >> c;
+	node["up"] >> u;
+	node["viewSize"][0] >> width;
+	node["viewSize"][1] >> height;
+	return new Camera(p, c, u, width, height);
+}
+
+Camera* Raytracer::parseEyeAsCamera(const YAML::Node & node)
+{
+	Point p;
+	node >> p;
+	return new Camera(p, Triple(p.x,p.y,0), Triple(0,1,0), 400, 400);
+}
+
 /*
 * Read a scene from file
 */
@@ -178,7 +199,13 @@ bool Raytracer::readScene(const std::string& inputFilename)
             }
 
             // Read scene configuration options
-            scene->setEye(parseTriple(doc["Eye"]));
+			try {
+				scene->setCamera(parseCamera(doc["Camera"]));
+			} catch (YAML::TypedKeyNotFound<std::string> &e) {
+				cout << "Falling back on the Eye parameter for camera specification\n";
+				scene->setCamera(parseEyeAsCamera(doc["Eye"]));
+			}
+            //scene->setEye(parseTriple(doc["Eye"]));
 
             // Read and parse the scene objects
             const YAML::Node& sceneObjects = doc["Objects"];
@@ -220,9 +247,8 @@ bool Raytracer::readScene(const std::string& inputFilename)
 
 void Raytracer::renderToFile(const std::string& outputFilename)
 {
-    Image img(400,400);
     cout << "Tracing..." << endl;
-    scene->render(img);
+    Image img = scene->render();
     cout << "Writing image to " << outputFilename << "..." << endl;
     img.write_png(outputFilename.c_str());
     cout << "Done." << endl;
