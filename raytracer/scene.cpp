@@ -123,9 +123,9 @@ Image Scene::render()
     int p, q;
     float px, py;
     Color c;
-    Vector U = camera->up.cross(camera->centre - camera->position).normalized();
-    Vector W = (camera->centre - camera->position).normalized();
-    Vector V = U.cross(W).normalized();
+    Vector W = -(camera->centre - camera->position).normalized();
+    Vector U = camera->up.cross(W).normalized();
+    Vector V = W.cross(U).normalized();
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             c = Color(0.0f);
@@ -138,7 +138,7 @@ Image Scene::render()
                     py = ((h/2)-1 - y + ((q+0.5)/(float)SSFactor)) * camera->up.length();
                     // Find the pixel point inside of the viewplane and cast a
                     // ray towards it
-                    Point pixel = camera->centre - U*px - V*py;
+                    Point pixel = camera->centre + U*px + V*py;
                     Ray ray(camera->position, (pixel-camera->position).normalized());
                     c += trace(ray);
                 }
