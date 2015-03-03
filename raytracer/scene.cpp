@@ -121,23 +121,24 @@ Image Scene::render()
     int w = img.width();
     int h = img.height();
     int p, q;
-	float px, py, pz=0;
+    float px, py;
     Color c;
-	Vector U = camera->up.cross(camera->centre - camera->position).normalized();
-	Vector W = (camera->centre - camera->position).normalized();
-	cout << U << W << endl;
+    Vector U = camera->up.cross(camera->centre - camera->position).normalized();
+    Vector W = (camera->centre - camera->position).normalized();
+    Vector V = U.cross(W).normalized();
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             c = Color(0.0f);
             for (p=0; p<SSFactor; ++p) {
                 for (q=0; q<SSFactor; ++q) {
-					px = (x - (w/2) + ((p+0.5)/(float)SSFactor)) * camera->up.length();
-					py = ((h/2)-1 - y + ((q+0.5)/(float)SSFactor)) * camera->up.length();
-					Point pixel(
-							camera->centre.x - px*U.x + py*camera->up.normalized().x + pz*W.x,
-							camera->centre.y + px*U.y + py*camera->up.normalized().y + pz*W.y,
-							camera->centre.z + px*U.z + py*camera->up.normalized().z + pz*W.z
-						);
+                    // Calculate position inside view plane
+                    // Ranges from -x/2 to x/2, is value from this range +
+                    // super sampling subpixel offset * pixel size
+                    px = (x - (w/2) + ((p+0.5)/(float)SSFactor)) * camera->up.length();
+                    py = ((h/2)-1 - y + ((q+0.5)/(float)SSFactor)) * camera->up.length();
+                    // Find the pixel point inside of the viewplane and cast a
+                    // ray towards it
+                    Point pixel = camera->centre - U*px - V*py;
                     Ray ray(camera->position, (pixel-camera->position).normalized());
                     c += trace(ray);
                 }
