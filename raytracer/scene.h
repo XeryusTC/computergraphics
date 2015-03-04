@@ -30,6 +30,12 @@ typedef enum RENDER_MODE {
     NORMAL,
 } RENDER_MODE;
 
+typedef enum SUPERSAMPLING_MODE {
+	GRID,
+	JITTER,
+	RANDOM,
+} SUPERSAMPLING_MODE;
+
 // Cast shadow ray a bit above surface to prevent from detecting the surface
 // being between itself and the light source
 const double RECAST_OFFSET = 0.0000000001;
@@ -43,6 +49,7 @@ private:
 	bool shadows;
     unsigned int maxRecursionDepth;
     int SSFactor;
+	SUPERSAMPLING_MODE SSMode;
 	Camera* camera;
 
     // Change the render mode
@@ -60,7 +67,7 @@ public:
     void setMode(RENDER_MODE m);
 	void setShadows(bool s);
     void setRecursionDepth(unsigned int d);
-    void setSuperSampling(unsigned int factor);
+    void setSuperSampling(unsigned int factor=1, SUPERSAMPLING_MODE mode=GRID);
 	void setCamera(Camera *c);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }

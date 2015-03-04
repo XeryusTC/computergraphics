@@ -14,6 +14,7 @@
 //  http://isgwww.cs.uni-magdeburg.de/graphik/lehre/cg2/projekt/rtprojekt.html
 //
 
+#include <cstdlib>
 #include "scene.h"
 #include "material.h"
 
@@ -121,7 +122,7 @@ Image Scene::render()
     int w = img.width();
     int h = img.height();
     int p, q;
-    float px, py;
+    float px, py, SSx, SSy, SSf = static_cast<float>(SSFactor);
     Color c;
     Vector W = -(camera->centre - camera->position).normalized();
     Vector U = camera->up.cross(W).normalized();
@@ -132,10 +133,22 @@ Image Scene::render()
             for (p=0; p<SSFactor; ++p) {
                 for (q=0; q<SSFactor; ++q) {
                     // Calculate position inside view plane
-                    // Ranges from -x/2 to x/2, is value from this range +
-                    // super sampling subpixel offset * pixel size
-                    px = (x - (w/2) + ((p+0.5)/(float)SSFactor)) * camera->up.length();
-                    py = ((h/2)-1 - y + ((q+0.5)/(float)SSFactor)) * camera->up.length();
+					switch(SSMode) {
+					case GRID:
+						SSx = (p + 0.5) / SSf;
+						SSy = (q + 0.5) / SSf;
+						break;
+					case JITTER:
+						SSx = (p + rand() / static_cast<float>(RAND_MAX)) / SSf;
+						SSy = (q + rand() / static_cast<float>(RAND_MAX)) / SSf;
+						break;
+					case RANDOM:
+						SSx = rand() / static_cast<float>(RAND_MAX);
+						SSy = rand() / static_cast<float>(RAND_MAX);
+						break;
+					}
+                    px = (x - (w/2) + SSx) * camera->up.length();
+                    py = ((h/2)-1 - y + SSy) * camera->up.length();
                     // Find the pixel point inside of the viewplane and cast a
                     // ray towards it
                     Point pixel = camera->centre + U*px + V*py;
@@ -143,7 +156,7 @@ Image Scene::render()
                     c += trace(ray);
                 }
             }
-            img(x, y) = c / (float)(SSFactor * SSFactor);
+            img(x, y) = c / static_cast<float>(SSFactor * SSFactor);
         }
     }
 
@@ -206,9 +219,10 @@ void Scene::setRecursionDepth(unsigned int d)
     maxRecursionDepth = d;
 }
 
-void Scene::setSuperSampling(unsigned int factor)
+void Scene::setSuperSampling(unsigned int factor, SUPERSAMPLING_MODE mode)
 {
     SSFactor = factor;
+	SSMode = mode;
 }
 
 void Scene::setCamera(Camera *c)

@@ -26,6 +26,13 @@
 #include <ctype.h>
 #include <fstream>
 #include <assert.h>
+#include <cstdlib>
+#include <ctime>
+
+Raytracer::Raytracer()
+{
+	srand(time(0));
+}
 
 // Functions to ease reading from YAML input
 void operator >> (const YAML::Node& node, Triple& t);
@@ -191,11 +198,30 @@ bool Raytracer::readScene(const std::string& inputFilename)
             try {
                 const YAML::Node& superSampling = doc["SuperSampling"];
                 unsigned int factor;
+				std::string m;
+				SUPERSAMPLING_MODE mode;
                 superSampling["factor"] >> factor;
-                scene->setSuperSampling(factor);
-            } catch (YAML::TypedKeyNotFound<std::string> &e) {
-                cout << "Setting default supersampling level\n";
-                scene->setSuperSampling(1);
+				// Read mode
+				try {
+					superSampling["mode"] >> m;
+					if (m == "grid") {
+						mode = GRID;
+						cout << "Using grid supersampling mode\n";
+					} else if (m == "jitter") {
+						mode = JITTER;
+						cout << "Using jitter supersampling mode\n";
+					} else if (m == "random") {
+						mode = RANDOM;
+						cout << "Using random supersampling mode\n";
+					}
+	            } catch (YAML::TypedKeyNotFound<std::string> &e) {
+					mode = GRID;
+					cout << "Falling back to grid supersampling mode\n";
+				}
+                scene->setSuperSampling(factor, mode);
+	        } catch (YAML::TypedKeyNotFound<std::string> &e) {
+                cout << "Using default supersampling settings\n";
+                scene->setSuperSampling();
             }
 
             // Read scene configuration options
