@@ -2,12 +2,13 @@ Camera:
     eye: [400, 100, 800]
     center: [0, 0, 0]
     up: [0, 1, 0]
-    viewSize: [600, 400]
+    viewSize: [640, 480]
 
 Shadows: true
-MaxRecursionDepth: 2 
+MaxRecursionDepth: 4 
 SuperSampling:
-    factor: 4
+    factor: 8
+    mode: jitter
 
 Lights:
 - position: [0, 200, 800]

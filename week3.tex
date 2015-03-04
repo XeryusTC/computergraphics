@@ -18,7 +18,7 @@
 	\end{figure}
 \end{frame}
 
-\section{Anti-aliasing}
+\section{Super sampling}
 \begin{frame}
 	\begin{columns}[T]
 		\begin{column}{.3\textwidth}
@@ -55,6 +55,30 @@
 			\begin{figure}
 				\includegraphics[width=\textwidth]{raytracer/zoomed-scene01-ss-ref.png}
 			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	Super sampling modes
+	\begin{columns}[T]
+		\begin{column}{.33\textwidth}
+			Grid
+			\begin{figure}
+				\includegraphics[width=\textwidth]{raytracer/scene01-camera-ss-reflect-lights-shadows.png}
+			\end{figure}
+		\end{column}
+		\begin{column}{.33\textwidth}
+			Jitter
+			\begin{figure}
+				\includegraphics[width=\textwidth]{raytracer/scene01-camera-ss-jitter-reflect-lights-shadows.png}
+				\end{figure}
+		\end{column}
+		\begin{column}{.33\textwidth}
+			Random
+			\begin{figure}
+				\includegraphics[width=\textwidth]{raytracer/scene01-camera-ss-random-reflect-lights-shadows.png}
+				\end{figure}
 		\end{column}
 	\end{columns}
 \end{frame}
