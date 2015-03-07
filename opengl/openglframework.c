@@ -39,6 +39,7 @@
 #include "input.h"
 #include "glslshaders.h"
 #include "scene.h"
+#include "mesh.h"
 
 /* CONSTANTS */
 GLfloat cubeVertices[8*3] = {-1,-1,-1, -1,-1, 1, -1, 1,-1,  1,-1,-1, -1, 1, 1,  1,-1, 1,  1, 1,-1,  1, 1, 1};
@@ -109,6 +110,8 @@ int main(int argc, char** argv)
     GLenum err;
 #endif
 
+    char *modelfile;
+
 	// Set default options
 	rotate_mode = MODE_ROTATE_CLICK;
 	scene = DEFAULT_SCENE;
@@ -131,6 +134,12 @@ int main(int argc, char** argv)
 			screen.width=400;
 			screen.height=400;
 		}
+        // Meshes
+        else if (strcmp(argv[i], "-m")==0 || strcmp(argv[i], "--mesh")==0) {
+            scene = MESH;
+            modelfile = malloc((strlen(argv[i+1])+1)*sizeof(char));
+            memcpy(modelfile, argv[i+1], strlen(argv[i+1])*sizeof(char));
+        }
 	}
 
 	// Create window
@@ -191,6 +200,24 @@ int main(int argc, char** argv)
 		cam.yaw = 180.0;
 		cam.roll = 0.0;
 		break;
+    case MESH:
+        glShadeModel(GL_SMOOTH);
+        glutDisplayFunc(displayMesh);
+        glutReshapeFunc(reshapeMesh);
+
+        loadModel(modelfile);
+		// Setup light
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+
+        // Setup camera
+        cam.x = 0.0;
+        cam.y = 0.0;
+        cam.z = 500.0;
+        cam.pitch = 0.0;
+        cam.yaw = 180.0;
+        cam.roll = 0.0;
+        break;
 	}
 
 	glutKeyboardFunc(keyboard);
@@ -201,6 +228,11 @@ int main(int argc, char** argv)
 	mouse.calculateDelta=false;
 
     glutMainLoop();
+
+    // Cleanup
+    if (scene == MESH) {
+        free(modelfile);
+    }
 
     return 0;
 }
