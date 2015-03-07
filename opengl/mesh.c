@@ -14,6 +14,8 @@
 #include "camera.h"
 #include "glm.h"
 
+const int glfSize = sizeof(GLfloat);
+
 extern ScreenInfo screen;
 extern Camera cam;
 extern CONTROL_MODE rotate_mode;
@@ -23,7 +25,7 @@ GLMmodel *obj;
 GLfloat model_light_pos[4] = {100.0, 600.0, 200.0, 0.0};
 GLfloat model_light_color[3] = {1.0, 1.0, 1.0};
 
-GLuint vboId, vboIndices;
+GLuint vboId;
 
 void displayMesh(void)
 {
@@ -82,6 +84,7 @@ void unloadModel(void)
 void glmInitVBO(char *filename)
 {
     int i;
+    int vsize, nsize; // Size of vertices and normals in VBO in bytes
     // Make sure that there is a model loaded
     if (!obj)
         loadModel(filename);
@@ -89,40 +92,45 @@ void glmInitVBO(char *filename)
     // Create VBO for vertices and normals
     glGenBuffersARB(1, &vboId);
     glBindBufferARB(GL_ARRAY_BUFFER, vboId);
-    // Load vertex data
-    glBufferDataARB(GL_ARRAY_BUFFER, (obj->numvertices+1)*3*sizeof(GLfloat),
-            obj->vertices, GL_STATIC_DRAW);
+    vsize = obj->numtriangles * 9 * glfSize;
+    nsize = obj->numtriangles * 9 * glfSize;
+    glBufferDataARB(GL_ARRAY_BUFFER, vsize + nsize, NULL, GL_STATIC_DRAW);
 
-    // Load normal data
-
-    // Load index data
-    glGenBuffers(1, &vboIndices);
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
-    glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * obj->numtriangles,
-            NULL, GL_STATIC_DRAW);
+    // Convert triangles to lists vertices & their normals
+    GLfloat *v = malloc(vsize);
+    GLfloat *n = malloc(nsize);
     for (i=0; i<obj->numtriangles; ++i) {
-        glBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER, i*3*sizeof(GLuint),
-                3*sizeof(GLuint), obj->triangles[i].vindices);
+        memcpy(&v[i*9],   &obj->vertices[obj->triangles[i].vindices[0]*3], 3*glfSize);
+        memcpy(&v[i*9+3], &obj->vertices[obj->triangles[i].vindices[1]*3], 3*glfSize);
+        memcpy(&v[i*9+6], &obj->vertices[obj->triangles[i].vindices[2]*3], 3*glfSize);
+        memcpy(&n[i*9],   &obj->normals[obj->triangles[i].nindices[0]*3], 3*glfSize);
+        memcpy(&n[i*9+3], &obj->normals[obj->triangles[i].nindices[1]*3], 3*glfSize);
+        memcpy(&n[i*9+6], &obj->normals[obj->triangles[i].nindices[2]*3], 3*glfSize);
     }
+    // Store the lists of vertices and normals in the VBO
+    glBufferSubDataARB(GL_ARRAY_BUFFER, 0, vsize, v);
+    glBufferSubDataARB(GL_ARRAY_BUFFER, vsize, nsize, n);
+    free(v);
+    free(n);
 }
 
 void glmDrawVBO(void)
 {
     glBindBufferARB(GL_ARRAY_BUFFER, vboId);
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
 
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, 0, obj->numtriangles * 9 * glfSize);
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, 0);
 
-    glDrawElements(GL_TRIANGLES, obj->numtriangles*3, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, obj->numtriangles*3);
 
+    glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
     glBindBufferARB(GL_ARRAY_BUFFER, 0);
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void glmDestroyVBO(void)
 {
     glDeleteBuffersARB(1, &vboId);
-    glDeleteBuffersARB(1, &vboIndices);
 }
