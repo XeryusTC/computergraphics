@@ -6,8 +6,8 @@
     #include <GL/glut.h>
 #endif
 
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "mesh.h"
 #include "input.h"
@@ -42,8 +42,8 @@ void displayMesh(void)
 	glLightfv(GL_LIGHT0, GL_DIFFUSE,  model_light_color);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, model_light_color);
 
-    if (obj)
-        glmDraw(obj, GLM_SMOOTH);
+
+    glmDrawVBO();
 
     if (rotate_mode == MODE_FPS)
 		resetMousePosition();
@@ -71,7 +71,7 @@ void loadModel(char *filename)
     glmFacetNormals(obj);
     glmVertexNormals(obj, 90.0);
     glmUnitize(obj);
-    glmScale(obj, 200.0);
+    glmScale(obj, 100.0);
 }
 
 void unloadModel(void)
@@ -79,3 +79,50 @@ void unloadModel(void)
     glmDelete(obj);
 }
 
+void glmInitVBO(char *filename)
+{
+    int i;
+    // Make sure that there is a model loaded
+    if (!obj)
+        loadModel(filename);
+
+    // Create VBO for vertices and normals
+    glGenBuffersARB(1, &vboId);
+    glBindBufferARB(GL_ARRAY_BUFFER, vboId);
+    // Load vertex data
+    glBufferDataARB(GL_ARRAY_BUFFER, (obj->numvertices+1)*3*sizeof(GLfloat),
+            obj->vertices, GL_STATIC_DRAW);
+
+    // Load normal data
+
+    // Load index data
+    glGenBuffers(1, &vboIndices);
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
+    glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * obj->numtriangles,
+            NULL, GL_STATIC_DRAW);
+    for (i=0; i<obj->numtriangles; ++i) {
+        glBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER, i*3*sizeof(GLuint),
+                3*sizeof(GLuint), obj->triangles[i].vindices);
+    }
+}
+
+void glmDrawVBO(void)
+{
+    glBindBufferARB(GL_ARRAY_BUFFER, vboId);
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+
+    glDrawElements(GL_TRIANGLES, obj->numtriangles*3, GL_UNSIGNED_INT, 0);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glBindBufferARB(GL_ARRAY_BUFFER, 0);
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void glmDestroyVBO(void)
+{
+    glDeleteBuffersARB(1, &vboId);
+    glDeleteBuffersARB(1, &vboIndices);
+}

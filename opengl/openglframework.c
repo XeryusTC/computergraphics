@@ -205,7 +205,7 @@ int main(int argc, char** argv)
         glutDisplayFunc(displayMesh);
         glutReshapeFunc(reshapeMesh);
 
-        loadModel(modelfile);
+        glmInitVBO(modelfile);
 		// Setup light
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
@@ -232,6 +232,7 @@ int main(int argc, char** argv)
     // Cleanup
     if (scene == MESH) {
         free(modelfile);
+        glmDestroyVBO();
     }
 
     return 0;
