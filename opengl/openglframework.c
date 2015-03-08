@@ -62,6 +62,8 @@ SCENE scene;
 float rotx=0, roty=0;
 Camera cam;
 
+extern VBOData model;
+
 void displayDefault(void)
 {
     /* Clear all pixels */
@@ -137,8 +139,7 @@ int main(int argc, char** argv)
         // Meshes
         else if (strcmp(argv[i], "-m")==0 || strcmp(argv[i], "--mesh")==0) {
             scene = MESH;
-            modelfile = malloc((strlen(argv[i+1])+1)*sizeof(char));
-            memcpy(modelfile, argv[i+1], strlen(argv[i+1])*sizeof(char));
+			modelfile = argv[i+1];
         }
 	}
 
@@ -205,7 +206,7 @@ int main(int argc, char** argv)
         glutDisplayFunc(displayMesh);
         glutReshapeFunc(reshapeMesh);
 
-        glmInitVBO(modelfile);
+        model = glmInitVBO(modelfile);
 		// Setup light
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
@@ -232,7 +233,7 @@ int main(int argc, char** argv)
     // Cleanup
     if (scene == MESH) {
         free(modelfile);
-        glmDestroyVBO();
+		destroyVBOData(&model);
     }
 
     return 0;
