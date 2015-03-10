@@ -40,62 +40,102 @@
 #include "glslshaders.h"
 #include "scene.h"
 
-/* CONSTANTS */
-GLfloat cubeVertices[8*3] = {-1,-1,-1, -1,-1, 1, -1, 1,-1,  1,-1,-1, -1, 1, 1,  1,-1, 1,  1, 1,-1,  1, 1, 1};
-GLubyte cubeFaces[3*12] = {
-        0,2,1, 4,2,1, // left face
-        3,5,7, 3,6,7, // right face
-        0,1,5, 0,3,5, // bottom face
-        4,2,6, 7,4,6, // top face
-        2,0,3, 2,6,3, // back face
-        5,1,4, 5,7,4, // front face
-    };
-GLfloat cubeFaceColors[3*8] = {0,0,1, 0,1,0, 0,1,1, 1,0,0, 1,0,1, 1,1,0, 1,1,1, .5,.5,.5};
 
+#define APERTURESAMPLES 8
 /* Globals galore */
 MouseInfo mouse;
 ScreenInfo screen;
 
 CONTROL_MODE rotate_mode;
 SCENE scene;
-float rotx=0, roty=0;
+float rotx=0, roty=0,
+      aperatureRadius,
+      focalDistance;
 Camera cam;
 
-void displayDefault(void)
-{
-    /* Clear all pixels */
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    glColor3f(0.0f,0.0f,1.0f);
-	cameraLookAt(cam);
+float deltaXs[APERTURESAMPLES], deltaYs[APERTURESAMPLES];
+float invApertureSamples = (float) 1 / APERTURESAMPLES;
 
-	// Set rotation
-	glMatrixMode(GL_MODELVIEW);
-	glRotatef(rotx, 1.0, 0.0, 0.0);
-	glRotatef(roty, 0.0, 1.0, 0.0);
+void initDOFoffsetValues(){
+    int   i               = 0;
+    float goldenAngle     = 137.508,
+          c, th, r;
+    c  = aperatureRadius/sqrt(APERTURESAMPLES);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
-    glColorPointer( 3, GL_FLOAT, 0, cubeFaceColors);
-
-	// draw a cube
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, cubeFaces);
-
-	// deactivate vertex arrays after drawing
-	glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-
-	if (rotate_mode == MODE_FPS)
-		resetMousePosition();
-
-    glutSwapBuffers();
-    glutPostRedisplay();
+    for (i = 0; i < APERTURESAMPLES; i++){
+         th         = i*goldenAngle;
+         r          = c*sqrt(i);
+         deltaXs[i] = sin(th)*r;
+         deltaYs[i] = cos(th)*r;
+    }
 }
+
+void displayDOF(void){
+
+    glClear(GL_ACCUM_BUFFER_BIT);
+    int   i                  = 0;
+    float lookAtX, lookAtY, lookAtZ;
+
+    glLoadIdentity();    
+    cameraLookDirVector(cam, &lookAtX, &lookAtY, &lookAtZ);
+
+    lookAtX += cam.x;
+    lookAtY += cam.y;
+    lookAtZ += cam.z - focalDistance;
+
+    // Do once for each DOF sampling round
+    for (i = 0; i < APERTURESAMPLES; i++){
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        glLoadIdentity();
+	gluLookAt(cam.x+deltaXs[i],   cam.y+deltaYs[i],   cam.z,
+                lookAtX, lookAtY, lookAtZ,
+                    0.0,     1.0,     0.0);
+        
+        drawScene(scene);
+        glFlush();
+        glAccum(GL_ACCUM, invApertureSamples);
+   }
+
+   if (rotate_mode == MODE_FPS)
+        resetMousePosition();
+     
+   glAccum(GL_RETURN, 1.0);
+   glutSwapBuffers();
+   glutPostRedisplay();
+}
+
+
+void displayDefault(void){
+
+   float lookAtX, lookAtY, lookAtZ;
+
+   glLoadIdentity();    
+   cameraLookDirVector(cam, &lookAtX, &lookAtY, &lookAtZ);
+
+   lookAtX += cam.x;
+   lookAtY += cam.y;
+   lookAtZ += cam.z - focalDistance;
+
+   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+   gluLookAt(cam.x,   cam.y,   cam.z,
+           lookAtX, lookAtY, lookAtZ,
+               0.0,     1.0,     0.0);
+        
+   drawScene(scene);
+   glFlush();
+
+   if (rotate_mode == MODE_FPS)
+        resetMousePosition();
+     
+   glutSwapBuffers();
+   glutPostRedisplay();
+}
+
 
 void reshapeDefault(int w, int h)
 {
-	screen.width = w;
-	screen.height = h;
+    screen.width = w;
+    screen.height = h;
     glViewport(0,0, (GLsizei) w, (GLsizei) h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -111,11 +151,14 @@ int main(int argc, char** argv)
 
 	// Set default options
 	rotate_mode = MODE_ROTATE_CLICK;
-	scene = DEFAULT_SCENE;
+	scene = DEFAULT_SCENE;//SCENE01
+        aperatureRadius=0.05;
+        focalDistance=10;
+        bool dof = false;
 	screen.width=800;
 	screen.height=600;
 	// Parse command line arguments
-	int i;
+	int  i;
 	for (i=1; i<argc; ++i) {
 		// Control modes
 		if (strcmp(argv[i], "-c")==0 || strcmp(argv[i], "--click")==0) {
@@ -130,12 +173,19 @@ int main(int argc, char** argv)
 			scene = SCENE01;
 			screen.width=400;
 			screen.height=400;
+                        aperatureRadius=10;
+                        focalDistance=1000;
+                }
+                // Depth Of Field
+                else if (strcmp(argv[i], "-d")==0 || strcmp(argv[i], "--dof")==0) {
+                        initDOFoffsetValues();
+                        dof = true;
 		}
 	}
 
 	// Create window
     glutInit(&argc,argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ACCUM);
     glutInitWindowSize(screen.width, screen.height);
     glutInitWindowPosition(220,100);
     glutCreateWindow("Computer Graphics - OpenGL framework");
@@ -155,14 +205,14 @@ int main(int argc, char** argv)
 
     /* Select clearing (background) color */
     glClearColor(0.0,0.0,0.0,0.0);
+    glClearAccum(0.0,0.0,0.0,0.0);
     glEnable(GL_DEPTH_TEST);
 
     /* Register GLUT callback functions */
-	switch (scene) {
+    switch (scene) {
 	case DEFAULT_SCENE:
-    	glShadeModel(GL_FLAT);
-	    glutDisplayFunc(displayDefault);
-    	glutReshapeFunc(reshapeDefault);
+    	        glShadeModel(GL_FLAT);
+    	        glutReshapeFunc(reshapeDefault);
 
 		// Setup camera
 		cam.x = 0.0;
@@ -175,8 +225,7 @@ int main(int argc, char** argv)
 		break;
 	case SCENE01:
 		initGLSLProgram("vertexshader.glsl", "fragmentshader.glsl");
-    	glShadeModel(GL_SMOOTH);
-		glutDisplayFunc(displayScene01);
+    	        glShadeModel(GL_SMOOTH);
 		glutReshapeFunc(reshapeScene01);
 
 		// Setup light
@@ -191,14 +240,19 @@ int main(int argc, char** argv)
 		cam.yaw = 180.0;
 		cam.roll = 0.0;
 		break;
-	}
+    }
 
-	glutKeyboardFunc(keyboard);
+    if (dof == true)
+        glutDisplayFunc(displayDOF);
+    else
+        glutDisplayFunc(displayDefault);
+
+    glutKeyboardFunc(keyboard);
     glutMouseFunc(mouseCallback);
     glutMotionFunc(motion);
     glutPassiveMotionFunc(passiveMotion);
 
-	mouse.calculateDelta=false;
+    mouse.calculateDelta=false;
 
     glutMainLoop();
 

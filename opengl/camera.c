@@ -14,12 +14,13 @@ const float TORAD = 3.141592654/180.0;
 void cameraLookAt(Camera cam)
 {
 	float x, y, z;
-    glLoadIdentity();
+        glLoadIdentity();
 	cameraLookDirVector(cam, &x, &y, &z);
 	gluLookAt(cam.x, cam.y, cam.z,
 	          cam.x+x, cam.y+y, cam.z+z,
 			  0.0, 1.0, 0.0);
 };
+
 
 void cameraLookDirVector(Camera cam, float *x, float *y, float *z) {
 	*x = sin(cam.yaw * TORAD);
