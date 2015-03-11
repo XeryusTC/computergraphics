@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "input.h"
 #include "scene.h"
+//#include "mesh.h"
 
 #define SPHERE_N (20)
 
@@ -29,6 +30,10 @@ GLubyte cubeFaces[3*12] = {
         5,1,4, 5,7,4, // front face
     };
 GLfloat cubeFaceColors[3*8] = {0,0,1, 0,1,0, 0,1,1, 1,0,0, 1,0,1, 1,1,0, 1,1,1, .5,.5,.5};
+
+//GLfloat model_light_pos[4] = {100.0, 600.0, 200.0, 0.0};
+//GLfloat model_light_color[3] = {1.0, 1.0, 1.0};
+
 
 extern ScreenInfo screen;
 extern Camera cam;
@@ -114,8 +119,22 @@ void drawScene(SCENE scene){
             glTranslated(110,130,200);
             glutSolidSphere(50,SPHERE_N,SPHERE_N);
             glPopMatrix();
+            break;
+/*        case MESH:
+ 	    // Set rotation
+	    glMatrixMode(GL_MODELVIEW);
+	    glRotatef(rotx, 1.0, 0.0, 0.0);
+	    glRotatef(roty, 0.0, 1.0, 0.0);
 
-           break;
+	    // Add light
+	    glLightfv(GL_LIGHT0, GL_POSITION, model_light_pos);
+	    glLightfv(GL_LIGHT0, GL_AMBIENT,  model_light_color);
+	    glLightfv(GL_LIGHT0, GL_DIFFUSE,  model_light_color);
+	    glLightfv(GL_LIGHT0, GL_SPECULAR, model_light_color);
+
+            glmDrawVBO(&model);
+            break;
+*/
         }
 }
 

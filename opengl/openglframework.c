@@ -39,6 +39,7 @@
 #include "input.h"
 #include "glslshaders.h"
 #include "scene.h"
+#include "mesh.h"
 
 
 #define APERTURESAMPLES 8
@@ -55,6 +56,8 @@ Camera cam;
 
 float deltaXs[APERTURESAMPLES], deltaYs[APERTURESAMPLES];
 float invApertureSamples = (float) 1 / APERTURESAMPLES;
+
+extern VBOData model;
 
 void initDOFoffsetValues(){
     int   i               = 0;
@@ -145,54 +148,62 @@ void reshapeDefault(int w, int h)
 
 int main(int argc, char** argv)
 {
-#if defined(NEED_GLEW)
+  #if defined(NEED_GLEW)
     GLenum err;
-#endif
+  #endif
 
-	// Set default options
-	rotate_mode = MODE_ROTATE_CLICK;
-	scene = DEFAULT_SCENE;//SCENE01
-        aperatureRadius=0.05;
-        focalDistance=10;
-        bool dof = false;
-	screen.width=800;
-	screen.height=600;
-	// Parse command line arguments
-	int  i;
-	for (i=1; i<argc; ++i) {
-		// Control modes
-		if (strcmp(argv[i], "-c")==0 || strcmp(argv[i], "--click")==0) {
-			rotate_mode = MODE_ROTATE_CLICK;
-		} else if (strcmp(argv[i], "-f")==0 || strcmp(argv[i], "--fps")==0) {
-			rotate_mode = MODE_FPS;
-		} else if (strcmp(argv[i], "-p")==0 || strcmp(argv[i], "--passive")==0) {
-			rotate_mode = MODE_ROTATE_PASSIVE;
-		}
-		// Scene
-		else if (strcmp(argv[i], "-1")==0 || strcmp(argv[i], "--scene01")==0) {
-			scene = SCENE01;
-			screen.width=400;
-			screen.height=400;
-                        aperatureRadius=10;
-                        focalDistance=1000;
-                }
-                // Depth Of Field
-                else if (strcmp(argv[i], "-d")==0 || strcmp(argv[i], "--dof")==0) {
-                        initDOFoffsetValues();
-                        dof = true;
-		}
+    char *modelfile;
+
+    // Set default options
+    rotate_mode = MODE_ROTATE_CLICK;
+    scene = DEFAULT_SCENE;//SCENE01
+    aperatureRadius=0.05;
+    focalDistance=10;
+    bool dof = false;
+    screen.width=800;
+    screen.height=600;
+    // Parse command line arguments
+    int  i;
+    for (i=1; i<argc; ++i) {
+        // Control modes
+	if (strcmp(argv[i], "-c")==0 || strcmp(argv[i], "--click")==0) {
+		rotate_mode = MODE_ROTATE_CLICK;
+	} else if (strcmp(argv[i], "-f")==0 || strcmp(argv[i], "--fps")==0) {
+		rotate_mode = MODE_FPS;
+	} else if (strcmp(argv[i], "-p")==0 || strcmp(argv[i], "--passive")==0) {
+		rotate_mode = MODE_ROTATE_PASSIVE;
 	}
+	// Scene
+	else if (strcmp(argv[i], "-1")==0 || strcmp(argv[i], "--scene01")==0) {
+		scene = SCENE01;
+		screen.width=400;
+		screen.height=400;
+                aperatureRadius=10;
+                focalDistance=1000;
+        }
+        // Depth Of Field
+        else if (strcmp(argv[i], "-d")==0 || strcmp(argv[i], "--dof")==0) {
+                initDOFoffsetValues();
+                dof = true;
+	}
+        // Meshes
+        else if (strcmp(argv[i], "-m")==0 || strcmp(argv[i], "--mesh")==0) {
+                scene = MESH;
+                modelfile = argv[i+1];
+    //            focalDistance = 0;
+        }
+    }
 
-	// Create window
+    // Create window
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ACCUM);
     glutInitWindowSize(screen.width, screen.height);
     glutInitWindowPosition(220,100);
     glutCreateWindow("Computer Graphics - OpenGL framework");
-	if (rotate_mode == MODE_FPS)
-		glutSetCursor(GLUT_CURSOR_NONE);
+    if (rotate_mode == MODE_FPS)
+        glutSetCursor(GLUT_CURSOR_NONE);
 
-#if defined(NEED_GLEW)
+ #if defined(NEED_GLEW)
     /* Init GLEW if needed */
     err = glewInit();
     if (GLEW_OK != err) {
@@ -201,7 +212,7 @@ int main(int argc, char** argv)
         exit(1);
     }
     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-#endif
+  #endif
 
     /* Select clearing (background) color */
     glClearColor(0.0,0.0,0.0,0.0);
@@ -240,12 +251,30 @@ int main(int argc, char** argv)
 		cam.yaw = 180.0;
 		cam.roll = 0.0;
 		break;
-    }
+        case MESH:
+                glShadeModel(GL_SMOOTH);
+                glutDisplayFunc(displayMesh);
+                glutReshapeFunc(reshapeMesh);
 
-    if (dof == true)
-        glutDisplayFunc(displayDOF);
-    else
-        glutDisplayFunc(displayDefault);
+                model = glmInitVBO(modelfile);
+                // Setup light
+                glEnable(GL_LIGHTING);
+                glEnable(GL_LIGHT0);
+
+                // Setup camera
+                cam.x = 0.0;
+                cam.y = 0.0;
+                cam.z = 500.0;
+                cam.pitch = 0.0;
+                cam.yaw = 180.0;
+                cam.roll = 0.0;
+                break;
+    }
+    
+//    if (dof == true)
+//        glutDisplayFunc(displayDOF);
+//    else
+//        glutDisplayFunc(displayDefault);
 
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouseCallback);
@@ -255,6 +284,12 @@ int main(int argc, char** argv)
     mouse.calculateDelta=false;
 
     glutMainLoop();
+
+    // Cleanup
+    if (scene == MESH) {
+        free(modelfile);
+		destroyVBOData(&model);
+    }
 
     return 0;
 }

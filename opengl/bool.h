@@ -1,6 +1,6 @@
 #ifndef BOOL_H
 #define BOOL_H
 
-typedef enum {true, false} bool;
+typedef enum {false,true} bool;
 
 #endif // BOOL_H

@@ -4,6 +4,7 @@
 typedef enum SCENE {
 	DEFAULT_SCENE,
 	SCENE01,
+    MESH,
 } SCENE;
 
 void displayDefault(void);
