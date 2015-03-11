@@ -58,6 +58,7 @@ float deltaXs[APERTURESAMPLES], deltaYs[APERTURESAMPLES];
 float invApertureSamples = (float) 1 / APERTURESAMPLES;
 
 extern VBOData model;
+extern bool remove_duplicates;
 
 void initDOFoffsetValues(){
     int   i               = 0;
@@ -79,7 +80,7 @@ void displayDOF(void){
     int   i                  = 0;
     float lookAtX, lookAtY, lookAtZ;
 
-    glLoadIdentity();    
+    glLoadIdentity();
     cameraLookDirVector(cam, &lookAtX, &lookAtY, &lookAtZ);
 
     lookAtX += cam.x;
@@ -93,7 +94,7 @@ void displayDOF(void){
 	gluLookAt(cam.x+deltaXs[i],   cam.y+deltaYs[i],   cam.z,
                 lookAtX, lookAtY, lookAtZ,
                     0.0,     1.0,     0.0);
-        
+
         drawScene(scene);
         glFlush();
         glAccum(GL_ACCUM, invApertureSamples);
@@ -101,7 +102,7 @@ void displayDOF(void){
 
    if (rotate_mode == MODE_FPS)
         resetMousePosition();
-     
+
    glAccum(GL_RETURN, 1.0);
    glutSwapBuffers();
    glutPostRedisplay();
@@ -112,7 +113,7 @@ void displayDefault(void){
 
    float lookAtX, lookAtY, lookAtZ;
 
-   glLoadIdentity();    
+   glLoadIdentity();
    cameraLookDirVector(cam, &lookAtX, &lookAtY, &lookAtZ);
 
    lookAtX += cam.x;
@@ -123,13 +124,13 @@ void displayDefault(void){
    gluLookAt(cam.x,   cam.y,   cam.z,
            lookAtX, lookAtY, lookAtZ,
                0.0,     1.0,     0.0);
-        
+
    drawScene(scene);
    glFlush();
 
    if (rotate_mode == MODE_FPS)
         resetMousePosition();
-     
+
    glutSwapBuffers();
    glutPostRedisplay();
 }
@@ -188,9 +189,11 @@ int main(int argc, char** argv)
 	}
         // Meshes
         else if (strcmp(argv[i], "-m")==0 || strcmp(argv[i], "--mesh")==0) {
-                scene = MESH;
-                modelfile = argv[i+1];
-    //            focalDistance = 0;
+            scene = MESH;
+            modelfile = argv[i+1];
+            //focalDistance = 0;
+        } else if (strcmp(argv[i], "-r")==0 || strcmp(argv[i], "--remove-duplicates")==0) {
+            remove_duplicates = true;
         }
     }
 
@@ -270,7 +273,7 @@ int main(int argc, char** argv)
                 cam.roll = 0.0;
                 break;
     }
-    
+
 //    if (dof == true)
 //        glutDisplayFunc(displayDOF);
 //    else

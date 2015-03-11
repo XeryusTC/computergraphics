@@ -28,6 +28,7 @@ GLfloat model_light_pos[4] = {100.0, 600.0, 200.0, 0.0};
 GLfloat model_light_color[3] = {1.0, 1.0, 1.0};
 
 GLuint vboId;
+bool remove_duplicates=false;
 
 void displayMesh(void)
 {
@@ -127,7 +128,11 @@ void glmDrawVBO(VBOData *d)
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, 0);
 
-	glDrawElements(GL_TRIANGLES, d->indexFront*3, GL_UNSIGNED_INT, 0);
+    if (remove_duplicates) {
+        glDrawElements(GL_TRIANGLES, d->indexFront*3, GL_UNSIGNED_INT, 0);
+    } else {
+        glDrawArrays(GL_TRIANGLES, 0, d->indexFront);
+    }
 
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -231,7 +236,7 @@ void insertUniqueVBOData(VBOData *d, GLfloat *vertex, GLfloat *normal)
 {
 	GLuint index = vertexIsInVBOData(d, vertex, normal);
 	d->dataAvailable = true;
-	if (index == -1) {
+	if (!remove_duplicates || index == -1) {
 		insertIndexVBOData(d, d->front);
 		insertVertexVBOData(d, vertex, normal);
 	} else {
