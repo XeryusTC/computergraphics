@@ -227,13 +227,18 @@ void insertIndexVBOData(VBOData *d, GLuint index)
 
 void insertUniqueVBOData(VBOData *d, GLfloat *vertex, GLfloat *normal)
 {
-	GLuint index = vertexIsInVBOData(d, vertex, normal);
 	d->dataAvailable = true;
-	if (!remove_duplicates || index == -1) {
+	if (remove_duplicates) {
+		GLuint index = vertexIsInVBOData(d, vertex, normal);
+		if (index == -1) {
+			insertIndexVBOData(d, d->front);
+			insertVertexVBOData(d, vertex, normal);
+		} else {
+			insertIndexVBOData(d, index);
+		}
+	} else {
 		insertIndexVBOData(d, d->front);
 		insertVertexVBOData(d, vertex, normal);
-	} else {
-		insertIndexVBOData(d, index);
 	}
 }
 
