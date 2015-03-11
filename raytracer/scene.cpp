@@ -77,9 +77,10 @@ Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
 
 		// Detect shadows
 		if (shadows) {
+			float tmax = ((*it)->position -i).length();
 			Ray shadowray(i, ((*it)->position - i).normalized());
 			for (std::vector<Object*>::iterator jt=objects.begin(); jt!=objects.end(); ++jt) {
-				if ((*jt)->intersect(shadowray).t <= std::numeric_limits<double>::infinity()) {
+				if ((*jt)->intersect(shadowray).t <= tmax) {
 					hashit = true;
 					break;
 				}
