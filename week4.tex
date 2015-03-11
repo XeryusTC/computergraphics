@@ -5,7 +5,7 @@
 \usecolortheme{beaver}
 
 \author{Anne Wanningen \and Xeryus Stokkel}
-\title[Week 3]{Introduction to Computer Graphics raytracer week 3}
+\title[Week 4]{Introduction to Computer Graphics raytracer week 4}
 
 \begin{document}
 
@@ -14,80 +14,25 @@
 \section{Results}
 \begin{frame}
 	\begin{figure}
-		\includegraphics[width=\textwidth]{raytracer/scene01-zoom-ss-reflect-lights-shadows.png}
+		\includegraphics[width=\textwidth]{result.png}
 	\end{figure}
 \end{frame}
 
-\section{Super sampling}
-\begin{frame}
-	\begin{columns}[T]
-		\begin{column}{.3\textwidth}
-			Ours
-			\begin{figure}
-				\includegraphics[width=\textwidth]{raytracer/scene01-ss.png}
-			\end{figure}
-		\end{column}
-		\begin{column}{.3\textwidth}
-			Difference
-			\begin{figure}
-				\includegraphics[width=\textwidth]{raytracer/scene01-ss-diff.png}
-			\end{figure}
-		\end{column}
-		\begin{column}{.3\textwidth}
-			Reference
-			\begin{figure}
-				\includegraphics[width=\textwidth]{raytracer/scene01-ss-ref.png}
-			\end{figure}
-		\end{column}
-	\end{columns}
-\end{frame}
-
+\section{Depth of Field}
 \begin{frame}
 	\begin{columns}[T]
 		\begin{column}{.5\textwidth}
-			Ours
 			\begin{figure}
-				\includegraphics[width=\textwidth]{raytracer/zoomed-scene01-ss.png}
+				\includegraphics[width=\textwidth]{blurryCubes.png}
 			\end{figure}
 		\end{column}
 		\begin{column}{.5\textwidth}
-			Reference
 			\begin{figure}
-				\includegraphics[width=\textwidth]{raytracer/zoomed-scene01-ss-ref.png}
+				\includegraphics[width=\textwidth]{blurryBalls.png}
 			\end{figure}
 		\end{column}
 	\end{columns}
 \end{frame}
 
-\begin{frame}
-	Super sampling modes
-	\begin{columns}[T]
-		\begin{column}{.33\textwidth}
-			Grid
-			\begin{figure}
-				\includegraphics[width=\textwidth]{raytracer/scene01-camera-ss-reflect-lights-shadows.png}
-			\end{figure}
-		\end{column}
-		\begin{column}{.33\textwidth}
-			Jitter
-			\begin{figure}
-				\includegraphics[width=\textwidth]{raytracer/scene01-camera-ss-jitter-reflect-lights-shadows.png}
-				\end{figure}
-		\end{column}
-		\begin{column}{.33\textwidth}
-			Random
-			\begin{figure}
-				\includegraphics[width=\textwidth]{raytracer/scene01-camera-ss-random-reflect-lights-shadows.png}
-				\end{figure}
-		\end{column}
-	\end{columns}
-\end{frame}
-
-\section{Solar system}
-\begin{frame}
-	\begin{figure}
-		\includegraphics[width=\textwidth]{raytracer/solarsystem.png}
-	\end{figure}
-\end{frame}
 
 \end{document}
