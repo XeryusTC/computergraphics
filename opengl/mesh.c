@@ -32,10 +32,6 @@ bool remove_duplicates=false;
 
 void displayMesh(void)
 {
-    /* Clear all pixels */
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-	cameraLookAt(cam);
-
 	// Set rotation
 	glMatrixMode(GL_MODELVIEW);
 	glRotatef(rotx, 1.0, 0.0, 0.0);
@@ -51,9 +47,6 @@ void displayMesh(void)
 
     if (rotate_mode == MODE_FPS)
 		resetMousePosition();
-
-    glutSwapBuffers();
-    glutPostRedisplay();
 }
 
 void reshapeMesh(int w, int h)

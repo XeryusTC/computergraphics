@@ -60,7 +60,8 @@ float invApertureSamples = (float) 1 / APERTURESAMPLES;
 extern VBOData model;
 extern bool remove_duplicates;
 
-void initDOFoffsetValues(){
+void initDOFoffsetValues()
+{
     int   i               = 0;
     float goldenAngle     = 137.508,
           c, th, r;
@@ -74,8 +75,23 @@ void initDOFoffsetValues(){
     }
 }
 
-void displayDOF(void){
+void drawScene(SCENE scene)
+{
+    switch (scene) {
+	case DEFAULT_SCENE:
+		displayDefaultScene();
+        break;
+	case SCENE01:
+		displayScene01();
+        break;
+    case MESH:
+		displayMesh();
+        break;
+    }
+}
 
+void displayDOF(void)
+{
     glClear(GL_ACCUM_BUFFER_BIT);
     int   i                  = 0;
     float lookAtX, lookAtY, lookAtZ;
@@ -91,9 +107,9 @@ void displayDOF(void){
     for (i = 0; i < APERTURESAMPLES; i++){
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
-	gluLookAt(cam.x+deltaXs[i],   cam.y+deltaYs[i],   cam.z,
-                lookAtX, lookAtY, lookAtZ,
-                    0.0,     1.0,     0.0);
+		gluLookAt(cam.x+deltaXs[i],   cam.y+deltaYs[i],   cam.z,
+				lookAtX, lookAtY, lookAtZ,
+                0.0,     1.0,     0.0);
 
         drawScene(scene);
         glFlush();
@@ -109,8 +125,8 @@ void displayDOF(void){
 }
 
 
-void displayDefault(void){
-
+void displayDefault(void)
+{
    float lookAtX, lookAtY, lookAtZ;
 
    glLoadIdentity();
@@ -123,7 +139,7 @@ void displayDefault(void){
    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
    gluLookAt(cam.x,   cam.y,   cam.z,
            lookAtX, lookAtY, lookAtZ,
-               0.0,     1.0,     0.0);
+           0.0,     1.0,     0.0);
 
    drawScene(scene);
    glFlush();
@@ -133,18 +149,6 @@ void displayDefault(void){
 
    glutSwapBuffers();
    glutPostRedisplay();
-}
-
-
-void reshapeDefault(int w, int h)
-{
-    screen.width = w;
-    screen.height = h;
-    glViewport(0,0, (GLsizei) w, (GLsizei) h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(60.0,(GLdouble)w/(GLdouble)h,1.5,20.0);
-    glMatrixMode(GL_MODELVIEW);
 }
 
 int main(int argc, char** argv)
@@ -254,30 +258,29 @@ int main(int argc, char** argv)
 		cam.yaw = 180.0;
 		cam.roll = 0.0;
 		break;
-        case MESH:
-                glShadeModel(GL_SMOOTH);
-                glutDisplayFunc(displayMesh);
-                glutReshapeFunc(reshapeMesh);
+    case MESH:
+        glShadeModel(GL_SMOOTH);
+        glutReshapeFunc(reshapeMesh);
 
-                model = glmInitVBO(modelfile);
-                // Setup light
-                glEnable(GL_LIGHTING);
-                glEnable(GL_LIGHT0);
+		model = glmInitVBO(modelfile);
+        // Setup light
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
 
-                // Setup camera
-                cam.x = 0.0;
-                cam.y = 0.0;
-                cam.z = 500.0;
-                cam.pitch = 0.0;
-                cam.yaw = 180.0;
-                cam.roll = 0.0;
-                break;
+        // Setup camera
+        cam.x = 0.0;
+        cam.y = 0.0;
+        cam.z = 500.0;
+        cam.pitch = 0.0;
+        cam.yaw = 180.0;
+        cam.roll = 0.0;
+        break;
     }
 
-//    if (dof == true)
-//        glutDisplayFunc(displayDOF);
-//    else
-//        glutDisplayFunc(displayDefault);
+    if (dof == true)
+        glutDisplayFunc(displayDOF);
+    else
+        glutDisplayFunc(displayDefault);
 
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouseCallback);

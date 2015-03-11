@@ -54,90 +54,69 @@ void setGlMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat ka, GLfloat kd, GLfl
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, n);
 }
 
+void displayScene01(void) {
+	// Set rotation
+	glMatrixMode(GL_MODELVIEW);
+	glTranslatef(200.0, 200.0, 200.0);
+	glRotatef(rotx, 1.0, 0.0, 0.0);
+	glRotatef(roty, 0.0, 1.0, 0.0);
+	glTranslatef(-200.0, -200.0, -200.0);
 
+    // Add light
+    glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_color);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_color);
 
-void drawScene(SCENE scene){
-    switch (scene) {
-	case DEFAULT_SCENE:
-            // Set rotation
-            glMatrixMode(GL_MODELVIEW);
-            glRotatef(rotx, 1.0, 0.0, 0.0);
-            glRotatef(roty, 0.0, 1.0, 0.0);
- 
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glEnableClientState(GL_COLOR_ARRAY);
-            glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
-            glColorPointer( 3, GL_FLOAT, 0, cubeFaceColors);
- 
-            // draw a cube
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, cubeFaces);
- 
-            // deactivate vertex arrays after drawing
-            glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_COLOR_ARRAY);
-            break;
-       case SCENE01:
-            // Set rotation
-            glMatrixMode(GL_MODELVIEW);
-            glTranslatef(200.0, 200.0, 200.0);
-            glRotatef(rotx, 1.0, 0.0, 0.0);
-            glRotatef(roty, 0.0, 1.0, 0.0);
-            glTranslatef(-200.0, -200.0, -200.0);
+    setGlMaterial(0.0f,0.0f,1.0f,0.2,0.7,0.5,64);
+    glPushMatrix();
+    glTranslated(90,320,100);
+    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    glPopMatrix();
 
-            // Add light
-            glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
-            glLightfv(GL_LIGHT0, GL_AMBIENT, light_color);
-            glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color);
-            glLightfv(GL_LIGHT0, GL_SPECULAR, light_color);
+    setGlMaterial(0.0f,1.0f,0.0f,0.2,0.3,0.5,8);
+    glPushMatrix();
+    glTranslated(210,270,300);
+    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    glPopMatrix();
 
-            setGlMaterial(0.0f,0.0f,1.0f,0.2,0.7,0.5,64);
-            glPushMatrix();
-            glTranslated(90,320,100);
-            glutSolidSphere(50,SPHERE_N,SPHERE_N);
-            glPopMatrix();
+    setGlMaterial(1.0f,0.0f,0.0f,0.2,0.7,0.8,32);
+    glPushMatrix();
+    glTranslated(290,170,150);
+    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    glPopMatrix();
 
-            setGlMaterial(0.0f,1.0f,0.0f,0.2,0.3,0.5,8);
-            glPushMatrix();
-            glTranslated(210,270,300);
-            glutSolidSphere(50,SPHERE_N,SPHERE_N);
-            glPopMatrix();
+    setGlMaterial(1.0f,0.8f,0.0f,0.2,0.8,0.0,1);
+    glPushMatrix();
+    glTranslated(140,220,400);
+    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    glPopMatrix();
 
-            setGlMaterial(1.0f,0.0f,0.0f,0.2,0.7,0.8,32);
-            glPushMatrix();
-            glTranslated(290,170,150);
-            glutSolidSphere(50,SPHERE_N,SPHERE_N);
-            glPopMatrix();
-
-            setGlMaterial(1.0f,0.8f,0.0f,0.2,0.8,0.0,1);
-            glPushMatrix();
-            glTranslated(140,220,400);
-            glutSolidSphere(50,SPHERE_N,SPHERE_N);
-            glPopMatrix();
-
-            setGlMaterial(1.0f,0.5f,0.0f,0.2,0.8,0.5,32);
-            glPushMatrix();
-            glTranslated(110,130,200);
-            glutSolidSphere(50,SPHERE_N,SPHERE_N);
-            glPopMatrix();
-            break;
-/*        case MESH:
- 	    // Set rotation
-	    glMatrixMode(GL_MODELVIEW);
-	    glRotatef(rotx, 1.0, 0.0, 0.0);
-	    glRotatef(roty, 0.0, 1.0, 0.0);
-
-	    // Add light
-	    glLightfv(GL_LIGHT0, GL_POSITION, model_light_pos);
-	    glLightfv(GL_LIGHT0, GL_AMBIENT,  model_light_color);
-	    glLightfv(GL_LIGHT0, GL_DIFFUSE,  model_light_color);
-	    glLightfv(GL_LIGHT0, GL_SPECULAR, model_light_color);
-
-            glmDrawVBO(&model);
-            break;
-*/
-        }
+    setGlMaterial(1.0f,0.5f,0.0f,0.2,0.8,0.5,32);
+    glPushMatrix();
+    glTranslated(110,130,200);
+    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    glPopMatrix();
 }
 
+void displayDefaultScene(void) {
+	// Set rotation
+    glMatrixMode(GL_MODELVIEW);
+    glRotatef(rotx, 1.0, 0.0, 0.0);
+    glRotatef(roty, 0.0, 1.0, 0.0);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
+    glColorPointer( 3, GL_FLOAT, 0, cubeFaceColors);
+
+    // draw a cube
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, cubeFaces);
+
+    // deactivate vertex arrays after drawing
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+}
 
 void reshapeScene01(int w, int h)
 {
@@ -149,3 +128,15 @@ void reshapeScene01(int w, int h)
     gluPerspective(2.0*atan2(h/2.0,1000.0)*180.0/M_PI,(GLdouble)w/(GLdouble)h,100,1000);
     glMatrixMode(GL_MODELVIEW);
 }
+
+void reshapeDefault(int w, int h)
+{
+    screen.width = w;
+    screen.height = h;
+    glViewport(0,0, (GLsizei) w, (GLsizei) h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60.0,(GLdouble)w/(GLdouble)h,1.5,20.0);
+    glMatrixMode(GL_MODELVIEW);
+}
+
