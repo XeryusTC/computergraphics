@@ -44,3 +44,6 @@ ray
 *.synctex.gz
 *.toc
 *.pdf
+*.bbl
+*.blg
+*.vrb

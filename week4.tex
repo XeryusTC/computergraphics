@@ -1,11 +1,12 @@
 \documentclass{beamer}
 
 \usepackage{graphicx}
+\usepackage{listings}
 \usetheme{Szeged}
 \usecolortheme{beaver}
 
 \author{Anne Wanningen \and Xeryus Stokkel}
-\title[Week 4]{Introduction to Computer Graphics raytracer week 4}
+\title[Week 4]{Introduction to Computer Graphics OpenGL week 4}
 
 \begin{document}
 
@@ -14,7 +15,7 @@
 \section{Results}
 \begin{frame}
 	\begin{figure}
-		\includegraphics[width=\textwidth]{result.png}
+		\includegraphics[height=.90\textheight]{result.png}
 	\end{figure}
 \end{frame}
 
@@ -34,5 +35,59 @@
 	\end{columns}
 \end{frame}
 
+\section{Meshes}
+\begin{frame}
+	\begin{columns}[T]
+		\begin{column}{.45\textwidth}
+			Loads of black screens with little indication of the cause.
+		\end{column}
+		\begin{column}{.45\textwidth}
+			\begin{figure}
+				\includegraphics[width=\textwidth]{dolphins.png}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\begin{columns}[T]
+		\begin{column}{.45\textwidth}
+			\begin{figure}
+				\includegraphics[width=\textwidth]{teddy.png}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+	Vertex/normal pair deduplication: barely useful, sometimes leads to blank screens, quite slow.
+	\begin{lstlisting}
+	$ ./openglframework -m obj/cube.obj -r
+	Triangle count:    12
+	Normal count:      32
+	Expected vertices: 36
+	Actual vertices:   32
+	Stored indices:    36
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\begin{lstlisting}
+	$ ./openglframework -m obj/devilduk.obj -r
+	Triangle count:    3712
+	Normal count:      1976
+	Expected vertices: 11136
+	Actual vertices:   11136
+	Stored indices:    11136
+	\end{lstlisting}
+	\begin{lstlisting}
+	$ ./openglframework -m obj/dolphins.obj -r
+	Triangle count:    1692
+	Normal count:      1202
+	Expected vertices: 5076
+	Actual vertices:   5076
+	Stored indices:    5076
+	\end{lstlisting}
+\end{frame}
 
 \end{document}
