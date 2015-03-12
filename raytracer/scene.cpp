@@ -37,14 +37,13 @@ Color Scene::trace(const Ray &ray, unsigned int depth)
     // No hit? Return background color.
     if (!obj) return Color(0.0, 0.0, 0.0);
 
-    Material *material = obj->material;            //the hit objects material
     Point hit = ray.at(min_hit.t);                 //the hit point
     Vector N = min_hit.N;                          //the normal at hit point
     Vector V = -ray.D;                             //the view vector
 
     switch (mode) {
     case PHONG:
-        return renderPhong(material, hit, N, V, ray, min_hit.t, depth);
+        return renderPhong(obj, hit, N, V, ray, min_hit.t, depth);
     case ZBUFFER:
         return renderZBuffer(hit);
     case NORMAL:
@@ -53,12 +52,14 @@ Color Scene::trace(const Ray &ray, unsigned int depth)
     return Color(0.0, 0.0, 0.0);
 }
 
-Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
+Color Scene::renderPhong(Object *obj, Point hit, Vector N, Vector V,
         Ray orgray, double t, unsigned int depth)
 {
-    Color color = Color(0.0f), reflectColor = Color(0.0f);
+    Color color = Color(0.0f), reflectColor = Color(0.0f),
+          matColor = obj->surfaceColor(hit);
     Vector L, R;
 	Point i = orgray.at(t - RECAST_OFFSET);
+    Material *m = obj->material;
 
     // Reflection
     R = 2 * N.dot(V) * N - V;
@@ -72,7 +73,7 @@ Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
 
     for (std::vector<Light*>::iterator it=lights.begin(); it!=lights.end(); ++it) {
         // Ambient
-        color += (*it)->color * m->color * m->ka;
+        color += (*it)->color * matColor * m->ka;
 
 		// Detect shadows
         if (objectIsInShadow(i, (*it)))
@@ -83,7 +84,7 @@ Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
         L.normalize();
         if (N.dot(L) < 0.0)
             continue;
-        color += N.dot(L) * (*it)->color * m->color * m->kd;
+        color += N.dot(L) * (*it)->color * matColor * m->kd;
         // Specular
         R = 2 * N.dot(L) * N - L;
         if (R.dot(V) < 0) continue;
