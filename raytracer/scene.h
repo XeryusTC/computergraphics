@@ -58,6 +58,8 @@ private:
             double t, unsigned int depth);
     Color renderZBuffer(Point hit);
     Color renderNormal(Vector N);
+    // Other utility functions
+    bool objectIsInShadow(Point hit, Light *light);
 public:
     Color trace(const Ray &ray, unsigned int depth=0);
     Image render();

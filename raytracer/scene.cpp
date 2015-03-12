@@ -58,8 +58,7 @@ Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
 {
     Color color = Color(0.0f), reflectColor = Color(0.0f);
     Vector L, R;
-	Point i= orgray.at(t - RECAST_OFFSET);
-	bool hashit;
+	Point i = orgray.at(t - RECAST_OFFSET);
 
     // Reflection
     R = 2 * N.dot(V) * N - V;
@@ -70,24 +69,12 @@ Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
         color += reflectColor * m->ks;
 
     for (std::vector<Light*>::iterator it=lights.begin(); it!=lights.end(); ++it) {
-		hashit = false;
-
         // Ambient
         color += (*it)->color * m->color * m->ka;
 
 		// Detect shadows
-		if (shadows) {
-			float tmax = ((*it)->position -i).length();
-			Ray shadowray(i, ((*it)->position - i).normalized());
-			for (std::vector<Object*>::iterator jt=objects.begin(); jt!=objects.end(); ++jt) {
-				if ((*jt)->intersect(shadowray).t <= tmax) {
-					hashit = true;
-					break;
-				}
-			}
-		}
-		if (hashit)
-			continue;
+        if (objectIsInShadow(i, (*it)))
+            continue;
 
         // Diffusion
         L = (*it)->position - hit;
@@ -188,6 +175,21 @@ Image Scene::render()
         }
     }
 	return img;
+}
+
+bool Scene::objectIsInShadow(Point hit, Light *light)
+{
+    if (!shadows)
+        return false;
+
+	float tmax = (light->position - hit).length();
+	Ray shadowray(hit, (light->position - hit).normalized());
+	for (std::vector<Object*>::iterator jt=objects.begin(); jt!=objects.end(); ++jt) {
+		if ((*jt)->intersect(shadowray).t <= tmax) {
+			return true;
+		}
+	}
+    return false;
 }
 
 void Scene::addObject(Object *o)
