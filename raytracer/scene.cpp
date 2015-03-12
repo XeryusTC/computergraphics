@@ -63,7 +63,9 @@ Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
     // Reflection
     R = 2 * N.dot(V) * N - V;
     R.normalize();
-    Ray reflectRay = Ray(i, R);
+    Ray reflectRay = Ray(hit, R);
+    // Reflect from epsilon along the recast ray so the object doesn't reflect itself
+    reflectRay = Ray(reflectRay.at(RECAST_OFFSET), R);
     reflectColor = trace(reflectRay, depth+1);
     if (reflectColor.r || reflectColor.g || reflectColor.b)
         color += reflectColor * m->ks;
