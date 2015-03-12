@@ -22,21 +22,6 @@
 
 Hit Sphere::intersect(const Ray &ray)
 {
-    /****************************************************
-    * RT1.1: INTERSECTION CALCULATION
-    *
-    * Given: ray, position, r
-    * Sought: intersects? if true: *t
-    *
-    * Insert calculation of ray/sphere intersection here.
-    *
-    * You have the sphere's center (C) and radius (r) as well as
-    * the ray's origin (ray.O) and direction (ray.D).
-    *
-    * If the ray does not intersect the sphere, return false.
-    * Otherwise, return true and place the distance of the
-    * intersection point from the ray origin in *t (see example).
-    ****************************************************/
     double B, C, d, t;
     Vector dir, T;
 
@@ -55,16 +40,22 @@ Hit Sphere::intersect(const Ray &ray)
     if (t < 0.0)
         return Hit::NO_HIT();
 
-    /****************************************************
-    * RT1.2: NORMAL CALCULATION
-    *
-    * Given: t, C, r
-    * Sought: N
-    *
-    * Insert calculation of the sphere's normal at the intersection point.
-    ****************************************************/
     Vector N = ray.at(t) - position;
     N.normalize();
 
     return Hit(t,N);
+}
+
+Color Sphere::surfaceColor(const Point hit)
+{
+    if (!material->texture)
+        return material->color;
+    float theta, phi, u, v;
+    theta = acos((hit.z - position.z) / r);
+    phi = atan2((hit.y - position.y), (hit.x - position.x));
+    if (phi < 0)
+        phi += 2 * M_PI;
+    u = phi / (2 * M_PI);
+    v = (M_PI - theta) / M_PI;
+    return material->texture->colorAt(u, v);
 }

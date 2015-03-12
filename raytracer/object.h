@@ -29,7 +29,7 @@ public:
     virtual ~Object() { }
 
     virtual Hit intersect(const Ray &ray) = 0;
-    Color surfaceColor(const Point hit);
+    virtual Color surfaceColor(const Point hit);
 };
 
 #endif /* end of include guard: OBJECT_H_AXKLE0OF */

@@ -61,6 +61,7 @@ Material* Raytracer::parseMaterial(const YAML::Node& node)
     Material *m = new Material();
     if (node.FindValue("color")) {
         node["color"] >> m->color;
+        m->texture = NULL;
     } else if (node.FindValue("texture")) {
         node["texture"] >> texture;
         m->texture = new Image(texture.c_str());
