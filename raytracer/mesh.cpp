@@ -8,6 +8,7 @@
 Mesh::Mesh(std::string filename, float scale)
 {
     model = glmReadOBJ(const_cast<char*>(filename.c_str()));
+	glmReverseWinding(model);
     glmUnitize(model);
     glmScale(model, scale);
 
