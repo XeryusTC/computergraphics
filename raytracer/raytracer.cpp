@@ -23,6 +23,7 @@
 #include "image.h"
 #include "yaml/yaml.h"
 #include "camera.h"
+#include "mesh.h"
 #include <ctype.h>
 #include <fstream>
 #include <assert.h>
@@ -111,7 +112,14 @@ Object* Raytracer::parseObject(const YAML::Node& node)
 		node["height"] >> h;
 		Cylinder *c = new Cylinder(pos, r, h);
 		returnObject = c;
-	}
+	} else if (objectType == "mesh") {
+        std::string filename;
+        float scale;
+        node["file"] >> filename;
+        node["scale"] >> scale;
+        Mesh *m = new Mesh(filename, scale);
+        returnObject = m;
+    }
 
     if (returnObject) {
         // read the material and attach to object

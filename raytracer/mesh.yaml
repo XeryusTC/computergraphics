@@ -1,0 +1,24 @@
+Camera:
+  eye: [100,100,300]
+  center: [0,0,0]
+  up: [0,1,0]
+  viewSize: [400,400]
+
+Shadows: true
+SuperSampling:
+  factor: 1
+
+Lights:
+- position: [00, 0, 500]
+  color: [0.8, 0.8, 0.6]
+
+Objects:
+- type: mesh
+  file: ../opengl/obj/teddy.obj
+  scale: 50
+  material:
+    color: [.7, .7, .7]
+    ka: 0.1
+    kd: 0.7
+    ks: 0.2
+    n: 200
