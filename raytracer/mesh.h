@@ -7,6 +7,7 @@
 #include "glm.h"
 #include "object.h"
 #include "triangle.h"
+#include "triple.h"
 
 class Mesh : public Object
 {
@@ -16,6 +17,8 @@ public:
 
     virtual Hit intersect(const Ray &ray);
 private:
+	Point modelDataToPoint(float *array, unsigned int idx);
+
     GLMmodel *model;
     std::vector<Triangle*> triangles;
 };
