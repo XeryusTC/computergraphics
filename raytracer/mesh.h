@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "glm.h"
+#include "material.h"
 #include "object.h"
 #include "triangle.h"
 #include "triple.h"
@@ -18,6 +19,7 @@ public:
     virtual Hit intersect(const Ray &ray);
 private:
 	Point modelDataToPoint(float *array, unsigned int idx, Point offset=Point(0,0,0));
+    Material* modelDataToMaterial(unsigned int idx);
 
     GLMmodel *model;
     std::vector<SmoothTriangle*> triangles;

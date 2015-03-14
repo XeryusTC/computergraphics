@@ -17,15 +17,28 @@ Mesh::Mesh(std::string filename, float scale, Point pos)
     SmoothTriangle *t;
     Point a, b, c;
 	Vector d, e, f;
-    for (unsigned int i=0; i<model->numtriangles; ++i) {
-		a = modelDataToPoint(model->vertices, model->triangles[i].vindices[0], pos);
-		b = modelDataToPoint(model->vertices, model->triangles[i].vindices[1], pos);
-		c = modelDataToPoint(model->vertices, model->triangles[i].vindices[2], pos);
-		d = modelDataToPoint(model->normals,  model->triangles[i].nindices[0]);
-		e = modelDataToPoint(model->normals,  model->triangles[i].nindices[1]);
-		f = modelDataToPoint(model->normals,  model->triangles[i].nindices[2]);
-        t = new SmoothTriangle(a, b, c, d, e, f);
-        triangles.push_back(t);
+    Material *m;
+    GLMgroup *group = model->groups;
+    while (group) {
+        m = modelDataToMaterial(group->material);
+        for (unsigned int i=0; i<group->numtriangles; ++i) {
+            a = modelDataToPoint(model->vertices,
+                    model->triangles[group->triangles[i]].vindices[0], pos);
+            b = modelDataToPoint(model->vertices,
+                    model->triangles[group->triangles[i]].vindices[1], pos);
+            c = modelDataToPoint(model->vertices,
+                    model->triangles[group->triangles[i]].vindices[2], pos);
+            d = modelDataToPoint(model->normals,
+                    model->triangles[group->triangles[i]].nindices[0]).normalized();
+            e = modelDataToPoint(model->normals,
+                    model->triangles[group->triangles[i]].nindices[1]).normalized();
+            f = modelDataToPoint(model->normals,
+                    model->triangles[group->triangles[i]].nindices[2]).normalized();
+            t = new SmoothTriangle(a, b, c, d, e, f);
+            t->material = m;
+            triangles.push_back(t);
+        }
+        group = group->next;
     }
     cout << "Model from " << filename << " with " << triangles.size() << " triangles loaded." << endl;
 }
@@ -56,4 +69,21 @@ Point Mesh::modelDataToPoint(float *array, unsigned int idx, Point offset)
 	return Vector(array[idx*3] + offset.x,
 			array[idx*3+1] + offset.y,
 			array[idx*3+2] + offset.z);
+}
+
+Material* Mesh::modelDataToMaterial(unsigned int idx)
+{
+    if (idx == 0)
+        return material;
+
+    cout << "Loaded material\n";
+    Material *m = new Material();
+    m->color = Color(model->materials[idx].diffuse[1], model->materials[idx].diffuse[2],
+              model->materials[idx].diffuse[3]);
+    m->kd = (m->color.r + m->color.g + m->color.b) / 3.0;
+    m->ka = model->materials[idx].ambient[1];
+    m->ks = model->materials[idx].specular[1];
+    m->n  = model->materials[idx].shininess;
+
+    return m;
 }
