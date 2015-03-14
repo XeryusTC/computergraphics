@@ -8,7 +8,6 @@ Shadows: true
 MaxRecursionDepth: 1
 SuperSampling:
   factor: 1
-RenderMode: normals
 
 Lights:
 - position: [-200,600,1500]

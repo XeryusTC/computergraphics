@@ -42,7 +42,6 @@ Hit SmoothTriangle::intersect(const Ray &ray)
 	Vector u, v, n;
 	double d, t;
 	Point i, N;
-	double U, V;
 
 	u = Pa - Pb;
 	v = Pc - Pb;
@@ -67,13 +66,15 @@ Hit SmoothTriangle::intersect(const Ray &ray)
 		return Hit::NO_HIT();
 
 	// Interpolate normals
-	N = (i - Pb).normalized();
-	u.normalize();
-	d = N.dot(u);
-	if (d < 0) d = 0;
-	if (d > 1) d = 1;
-	U = (N.length() * d) / u.length();
-	V = (N.length() * d) / v.length();
-	N = (1 - (U + V) * Nb + Na * U + Nc * V);
-	return Hit(t, N);
+	Vector distA, distB, distC;
+    float totArea, area1, area2, area3;
+    distA = Pa - i;
+    distB = Pb - i;
+    distC = Pc - i;
+    totArea = (Pa-Pb).cross(Pa-Pc).length();
+    area1 = distB.cross(distC).length() / totArea;
+    area2 = distC.cross(distA).length() / totArea;
+    area3 = distB.cross(distA).length() / totArea;
+    N = Na * area1 + Nb * area2 + Nc * area3;
+    return Hit(t, N.normalized());
 }

@@ -9,7 +9,6 @@
 Mesh::Mesh(std::string filename, float scale, Point pos)
 {
     model = glmReadOBJ(const_cast<char*>(filename.c_str()));
-	glmReverseWinding(model);
 	glmFacetNormals(model);
 	glmVertexNormals(model, 90);
     glmUnitize(model);
