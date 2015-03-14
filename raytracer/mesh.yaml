@@ -8,6 +8,7 @@ Shadows: true
 MaxRecursionDepth: 1
 SuperSampling:
   factor: 1
+RenderMode: normals
 
 Lights:
 - position: [-200,600,1500]
@@ -19,7 +20,8 @@ Objects:
 - type: mesh
   file: ../opengl/obj/dolphins.obj
 #  file: ../opengl/obj/cube.obj
-  scale: 150
+  scale: 100
+  position: [75,25,25]
   material:
     color: [.7, .7, .7]
     ka: 0.2
