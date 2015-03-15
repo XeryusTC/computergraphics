@@ -102,15 +102,14 @@ Color Scene::renderGooch(Material *m, Point hit, Vector N, Vector V,
 {
     Color kd, kCool, kWarm, color = Color(0.0f);
     Vector L, R;
-//	Point i = orgray.at(t - RECAST_OFFSET);
-
+    kCool = Color(0,0,gooch_b);
+    kWarm = Color(gooch_y,gooch_y,0);
+ 
     for (std::vector<Light*>::iterator it=lights.begin(); it!=lights.end(); ++it) {
        
         L = (*it)->position - hit;
         L.normalize();
         kd = (*it)->color * m->color * m->kd;
-        kCool = Color(0,0,gooch_b);
-        kWarm = Color(gooch_y,gooch_y,0);
         kCool += gooch_alpha * kd;
         kWarm += gooch_beta * kd;
         color = kCool *(1 - N.dot(L))/2 + kWarm * (1 + N.dot(L))/2;
