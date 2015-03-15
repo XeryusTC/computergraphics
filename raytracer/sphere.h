@@ -25,7 +25,6 @@ public:
     Sphere(Point position,double r) : position(position), r(r) { }
 
     virtual Hit intersect(const Ray &ray);
-    virtual Color surfaceColor(const Point hit);
 
     const Point position;
     const double r;

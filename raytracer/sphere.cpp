@@ -22,8 +22,9 @@
 
 Hit Sphere::intersect(const Ray &ray)
 {
-    double B, C, d, t;
+    double B, C, d, t, theta, phi, u, v;
     Vector dir, T;
+    Point hit;
 
     dir  = ray.D.normalized();
     T = ray.O - position;
@@ -40,22 +41,20 @@ Hit Sphere::intersect(const Ray &ray)
     if (t < 0.0)
         return Hit::NO_HIT();
 
-    Vector N = ray.at(t) - position;
+    hit = ray.at(t);
+    Vector N = hit - position;
     N.normalize();
 
-    return Hit(t, N, material);
-}
+    // Calculate the color if there is a texture
+    if (material->texture) {
+        theta = acos((hit.z - position.z) / r);
+        phi = atan2((hit.y - position.y), (hit.x - position.x));
+        if (phi < 0)
+            phi += 2 * M_PI;
+        u = phi / (2 * M_PI);
+        v = (M_PI - theta) / M_PI;
+        material->color = material->texture->colorAt(u, v);
+    }
 
-Color Sphere::surfaceColor(const Point hit)
-{
-    if (!material->texture)
-        return material->color;
-    float theta, phi, u, v;
-    theta = acos((hit.z - position.z) / r);
-    phi = atan2((hit.y - position.y), (hit.x - position.x));
-    if (phi < 0)
-        phi += 2 * M_PI;
-    u = phi / (2 * M_PI);
-    v = (M_PI - theta) / M_PI;
-    return material->texture->colorAt(u, v);
+    return Hit(t, N, material);
 }
