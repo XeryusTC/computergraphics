@@ -113,12 +113,13 @@ Color Scene::renderGooch(Material *m, Point hit, Vector N, Vector V,
         kCool += gooch_alpha * kd;
         kWarm += gooch_beta * kd;
         color = kCool *(1 - N.dot(L))/2 + kWarm * (1 + N.dot(L))/2;
-
         // Specular
         R = 2 * N.dot(L) * N - L;
-        if (R.dot(V) < 0) continue;
-        R.normalize();
-        color += pow(V.dot(R), m->n) * (*it)->color * m->ks;
+        if (R.dot(V) > 0){
+            R.normalize();
+            color += pow(V.dot(R), m->n) * (*it)->color * m->ks;
+        }
+        if ((N.dot(V)) < 0.3) color = Color(0.0f, 0.0f, 0.0f);
 
     }
     return color;
