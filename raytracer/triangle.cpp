@@ -34,7 +34,7 @@ Hit Triangle::intersect(const Ray &ray)
 	if ((i-pointC).cross(pointA-pointC).dot(n) <= 0)
         	return Hit::NO_HIT();
 
-	return Hit(t,n);
+	return Hit(t,n, material);
 }
 
 Hit SmoothTriangle::intersect(const Ray &ray)
@@ -76,5 +76,5 @@ Hit SmoothTriangle::intersect(const Ray &ray)
     area2 = distC.cross(distA).length() / totArea;
     area3 = distB.cross(distA).length() / totArea;
     N = Na * area1 + Nb * area2 + Nc * area3;
-    return Hit(t, N.normalized());
+    return Hit(t, N.normalized(), material);
 }

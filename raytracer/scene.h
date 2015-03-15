@@ -54,7 +54,7 @@ private:
 
     // Change the render mode
     RENDER_MODE mode;
-    Color renderPhong(Object *obj, Point hit, Vector N, Vector V, Ray orgray,
+    Color renderPhong(Material *m, Point hit, Vector N, Vector V, Ray orgray,
             double t, unsigned int depth);
     Color renderZBuffer(Point hit);
     Color renderNormal(Vector N);

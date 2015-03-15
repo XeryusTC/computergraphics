@@ -43,7 +43,7 @@ Hit Sphere::intersect(const Ray &ray)
     Vector N = ray.at(t) - position;
     N.normalize();
 
-    return Hit(t,N);
+    return Hit(t, N, material);
 }
 
 Color Sphere::surfaceColor(const Point hit)

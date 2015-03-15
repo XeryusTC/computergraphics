@@ -31,7 +31,7 @@ Hit Cylinder::intersect(const Ray &ray)
 	N.z = P.z - pos.z;
 	N.normalize();
 
-	return Hit(t, N);
+	return Hit(t, N, material);
 }
 
 Hit Cylinder::intersectTopBottom(const Ray &ray)
@@ -52,7 +52,7 @@ Hit Cylinder::intersectTopBottom(const Ray &ray)
         t = t2;
     N.y = 1;
     if (t > 0)
-        return Hit(t, N);
+        return Hit(t, N, material);
 
 	return Hit::NO_HIT();
 }

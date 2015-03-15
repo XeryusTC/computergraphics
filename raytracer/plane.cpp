@@ -14,6 +14,6 @@ Hit Plane::intersect(const Ray &ray)
     if (t < 0)
         return Hit::NO_HIT();
 
-    return Hit(t, normal.normalized());
+    return Hit(t, normal.normalized(), material);
 }
 

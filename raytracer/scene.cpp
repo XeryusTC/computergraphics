@@ -24,7 +24,7 @@ Color Scene::trace(const Ray &ray, unsigned int depth)
         return Color(0.0);
 
     // Find hit object and distance
-    Hit min_hit(std::numeric_limits<double>::infinity(),Vector());
+    Hit min_hit(std::numeric_limits<double>::infinity(),Vector(), NULL);
     Object *obj = NULL;
     for (unsigned int i = 0; i < objects.size(); ++i) {
         Hit hit(objects[i]->intersect(ray));
@@ -43,7 +43,7 @@ Color Scene::trace(const Ray &ray, unsigned int depth)
 
     switch (mode) {
     case PHONG:
-        return renderPhong(obj, hit, N, V, ray, min_hit.t, depth);
+        return renderPhong(min_hit.m, hit, N, V, ray, min_hit.t, depth);
     case ZBUFFER:
         return renderZBuffer(hit);
     case NORMAL:
@@ -52,14 +52,12 @@ Color Scene::trace(const Ray &ray, unsigned int depth)
     return Color(0.0, 0.0, 0.0);
 }
 
-Color Scene::renderPhong(Object *obj, Point hit, Vector N, Vector V,
+Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
         Ray orgray, double t, unsigned int depth)
 {
-    Color color = Color(0.0f), reflectColor = Color(0.0f),
-          matColor = obj->surfaceColor(hit);
+    Color color = Color(0.0f), reflectColor = Color(0.0f);
     Vector L, R;
 	Point i = orgray.at(t - RECAST_OFFSET);
-    Material *m = obj->material;
 
     // Reflection
     R = 2 * N.dot(V) * N - V;
@@ -73,7 +71,7 @@ Color Scene::renderPhong(Object *obj, Point hit, Vector N, Vector V,
 
     for (std::vector<Light*>::iterator it=lights.begin(); it!=lights.end(); ++it) {
         // Ambient
-        color += (*it)->color * matColor * m->ka;
+        color += (*it)->color * m->color * m->ka;
 
 		// Detect shadows
         if (objectIsInShadow(i, (*it)))
@@ -84,7 +82,7 @@ Color Scene::renderPhong(Object *obj, Point hit, Vector N, Vector V,
         L.normalize();
         if (N.dot(L) < 0.0)
             continue;
-        color += N.dot(L) * (*it)->color * matColor * m->kd;
+        color += N.dot(L) * (*it)->color * m->color * m->kd;
         // Specular
         R = 2 * N.dot(L) * N - L;
         if (R.dot(V) < 0) continue;

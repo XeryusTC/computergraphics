@@ -50,7 +50,7 @@ Mesh::~Mesh()
 
 Hit Mesh::intersect(const Ray &ray)
 {
-    Hit min_hit(std::numeric_limits<double>::infinity(), Vector());
+    Hit min_hit(std::numeric_limits<double>::infinity(), Vector(), material);
     bool has_hit = false;
     for (unsigned int i=0; i<triangles.size(); ++i) {
         Hit hit(triangles[i]->intersect(ray));
@@ -59,8 +59,11 @@ Hit Mesh::intersect(const Ray &ray)
             has_hit = true;
         }
     }
-    if (has_hit)
+    if (has_hit) {
+        if (min_hit.m == NULL)
+            return Hit(min_hit.t, min_hit.N, material);
         return min_hit;
+    }
     return Hit::NO_HIT();
 }
 
@@ -74,7 +77,7 @@ Point Mesh::modelDataToPoint(float *array, unsigned int idx, Point offset)
 Material* Mesh::modelDataToMaterial(unsigned int idx)
 {
     if (idx == 0)
-        return material;
+        return NULL;
 
     cout << "Loaded material\n";
     Material *m = new Material();
