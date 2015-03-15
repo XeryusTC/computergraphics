@@ -48,9 +48,12 @@ Color Scene::trace(const Ray &ray, unsigned int depth)
         return renderZBuffer(hit);
     case NORMAL:
         return renderNormal(N);
+    case GOOCH:
+        return renderGooch(min_hit.m, hit, N, V, ray, min_hit.t, depth);
     }
     return Color(0.0, 0.0, 0.0);
 }
+
 
 Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
         Ray orgray, double t, unsigned int depth)
@@ -93,6 +96,35 @@ Color Scene::renderPhong(Material *m, Point hit, Vector N, Vector V,
     return color;
 }
 
+
+Color Scene::renderGooch(Material *m, Point hit, Vector N, Vector V,
+        Ray orgray, double t, unsigned int depth)
+{
+    Color kd, kCool, kWarm, color = Color(0.0f);
+    Vector L, R;
+//	Point i = orgray.at(t - RECAST_OFFSET);
+
+    for (std::vector<Light*>::iterator it=lights.begin(); it!=lights.end(); ++it) {
+       
+        L = (*it)->position - hit;
+        L.normalize();
+        kd = (*it)->color * m->color * m->kd;
+        kCool = Color(0,0,gooch_b);
+        kWarm = Color(gooch_y,gooch_y,0);
+        kCool += gooch_alpha * kd;
+        kWarm += gooch_beta * kd;
+        color = kCool *(1 - N.dot(L))/2 + kWarm * (1 + N.dot(L))/2;
+
+        // Specular
+        R = 2 * N.dot(L) * N - L;
+        if (R.dot(V) < 0) continue;
+        R.normalize();
+        color += pow(V.dot(R), m->n) * (*it)->color * m->ks;
+
+    }
+    return color;
+}
+
 Color Scene::renderZBuffer(Point hit)
 {
     return Color(hit.z, hit.z, hit.z);
@@ -103,6 +135,13 @@ Color Scene::renderNormal(Vector N)
     Vector C = N.normalized();
     C = (C + 1) * .5;
     return Color(C.x, C.y, C.z);
+}
+
+void Scene::setGoochParameters(float bA, float yA, float alphaA, float betaA){
+    gooch_b = bA;
+    gooch_y = yA;
+    gooch_alpha = alphaA;
+    gooch_beta = betaA;
 }
 
 Image Scene::render()

@@ -191,6 +191,9 @@ bool Raytracer::readScene(const std::string& inputFilename)
                     scene->setMode(ZBUFFER);
                 else if (m == "phong")
                     scene->setMode(PHONG);
+                 else if (m == "gooch")
+                    scene->setMode(GOOCH);
+                    parseGoochParameters(doc["GoochParameters"]);
             } catch (YAML::TypedKeyNotFound<std::string> &e) {
                 scene->setMode(PHONG);
             }
@@ -291,6 +294,14 @@ bool Raytracer::readScene(const std::string& inputFilename)
     return true;
 }
 
+
+void Raytracer::parseGoochParameters(const YAML::Node& node)
+{
+    scene->setGoochParameters(node["b"], node["y"], node["alpha"], node["beta"]);
+}
+
+
+
 void Raytracer::renderToFile(const std::string& outputFilename)
 {
     cout << "Tracing..." << endl;
@@ -298,4 +309,7 @@ void Raytracer::renderToFile(const std::string& outputFilename)
     cout << "Writing image to " << outputFilename << "..." << endl;
     img.write_png(outputFilename.c_str());
     cout << "Done." << endl;
+    string command("xdg-open ./");
+    command.append(outputFilename.c_str());
+    system(command.c_str());
 }

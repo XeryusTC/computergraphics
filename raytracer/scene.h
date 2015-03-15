@@ -28,6 +28,7 @@ typedef enum RENDER_MODE {
     PHONG,
     ZBUFFER,
     NORMAL,
+    GOOCH,
 } RENDER_MODE;
 
 typedef enum SUPERSAMPLING_MODE {
@@ -39,6 +40,9 @@ typedef enum SUPERSAMPLING_MODE {
 // Cast shadow ray a bit above surface to prevent from detecting the surface
 // being between itself and the light source
 const double RECAST_OFFSET = 0.0000000001;
+// Gooch rendering parameters
+float gooch_b, gooch_y, gooch_alpha, gooch_beta;
+
 
 class Scene
 {
@@ -56,6 +60,8 @@ private:
     RENDER_MODE mode;
     Color renderPhong(Material *m, Point hit, Vector N, Vector V, Ray orgray,
             double t, unsigned int depth);
+    Color renderGooch(Material *m, Point hit, Vector N, Vector V, Ray orgray,
+            double t, unsigned int depth);
     Color renderZBuffer(Point hit);
     Color renderNormal(Vector N);
     // Other utility functions
@@ -71,6 +77,7 @@ public:
     void setRecursionDepth(unsigned int d);
     void setSuperSampling(unsigned int factor=1, SUPERSAMPLING_MODE mode=GRID);
 	void setCamera(Camera *c);
+    void setGoochParameters(float bA, float yA, float alphaA, float betaA);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 };

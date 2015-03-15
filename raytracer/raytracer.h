@@ -33,6 +33,7 @@ private:
     Light* parseLight(const YAML::Node& node);
 	Camera* parseCamera(const YAML::Node &node);
 	Camera* parseEyeAsCamera(const YAML::Node &node);
+    void parseGoochParameters(const YAML::Node &node);
 
 public:
     Raytracer();
