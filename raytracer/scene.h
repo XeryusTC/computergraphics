@@ -40,8 +40,6 @@ typedef enum SUPERSAMPLING_MODE {
 // Cast shadow ray a bit above surface to prevent from detecting the surface
 // being between itself and the light source
 const double RECAST_OFFSET = 0.0000000001;
-// Gooch rendering parameters
-float gooch_b, gooch_y, gooch_alpha, gooch_beta;
 
 
 class Scene
@@ -55,6 +53,8 @@ private:
     int SSFactor;
 	SUPERSAMPLING_MODE SSMode;
 	Camera* camera;
+    // Gooch rendering parameters
+    float gooch_b, gooch_y, gooch_alpha, gooch_beta;
 
     // Change the render mode
     RENDER_MODE mode;
