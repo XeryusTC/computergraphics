@@ -81,8 +81,8 @@ Material* Mesh::modelDataToMaterial(unsigned int idx)
 
     cout << "Loaded material\n";
     Material *m = new Material();
-    m->color = Color(model->materials[idx].diffuse[1], model->materials[idx].diffuse[2],
-              model->materials[idx].diffuse[3]);
+    m->color = Color(model->materials[idx].diffuse[3], model->materials[idx].diffuse[1],
+              model->materials[idx].diffuse[2]);
     m->kd = (m->color.r + m->color.g + m->color.b) / 3.0;
     m->ka = model->materials[idx].ambient[1];
     m->ks = model->materials[idx].specular[1];

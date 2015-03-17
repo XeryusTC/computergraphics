@@ -2,7 +2,7 @@ Camera:
     eye: [200,200,1000]
     center: [0,0,0]
     up: [0,1,0]
-    viewSize: [400,400]
+    viewSize: [200,200]
 
 Shadows: true
 MaxRecursionDepth: 1
@@ -17,9 +17,9 @@ Lights:
 
 Objects:
 - type: mesh
-  file: ../opengl/obj/cube.obj
+  file: ../opengl/obj/dolphins.obj
   scale: 100
-  position: [75,25,25]
+  position: [0,0,0]
   material:
     color: [.7, .7, .7]
     ka: 0.2
