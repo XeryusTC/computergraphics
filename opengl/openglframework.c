@@ -162,6 +162,7 @@ int main(int argc, char** argv)
     // Set default options
     rotate_mode = MODE_ROTATE_CLICK;
     scene = DEFAULT_SCENE;//SCENE01
+    char *fragShaderFileName = "fragmentshader.glsl";
     aperatureRadius=0.05;
     focalDistance=10;
     bool dof = false;
@@ -186,6 +187,10 @@ int main(int argc, char** argv)
                 aperatureRadius=10;
                 focalDistance=1000;
         }
+	// Gooch Shading
+	else if (strcmp(argv[i], "-g")==0 || strcmp(argv[i], "--gooch")==0) {
+		fragShaderFileName = "fragment_GOOCH.glsl";
+	}
         // Depth Of Field
         else if (strcmp(argv[i], "-d")==0 || strcmp(argv[i], "--dof")==0) {
                 initDOFoffsetValues();
@@ -242,7 +247,7 @@ int main(int argc, char** argv)
 
 		break;
 	case SCENE01:
-		initGLSLProgram("vertexshader.glsl", "fragmentshader.glsl");
+		initGLSLProgram("vertexshader.glsl", fragShaderFileName);
     	        glShadeModel(GL_SMOOTH);
 		glutReshapeFunc(reshapeScene01);
 

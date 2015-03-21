@@ -40,7 +40,9 @@ extern Camera cam;
 extern CONTROL_MODE rotate_mode;
 extern float rotx, roty;
 
-GLfloat light_pos[4] = {-200.0, 600.0, 1500.0, 0.0};
+//Relative light coordinates to recreate GOOCH shading scene from raytracer:
+//GLfloat light_pos[4] = {-1200.0, 400.0, -600.0, 0.0};
+GLfloat light_pos[4] = {-1000.0, 600.0, 400.0, 0.0};
 GLfloat light_color[3] = {1.0, 1.0, 1.0};
 
 void setGlMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat ka, GLfloat kd, GLfloat ks, GLfloat n)
@@ -97,6 +99,15 @@ void displayScene01(void) {
     glTranslated(110,130,200);
     glutSolidSphere(50,SPHERE_N,SPHERE_N);
     glPopMatrix();
+
+    //Extra background sphere to recreate GOOCH shading scene from raytracer:
+/*
+    setGlMaterial(0.4f,0.4f,0.4f,0.2,0.8,0,1);
+    glPushMatrix();
+    glTranslated(200,200,-1000);
+    glutSolidSphere(1000,SPHERE_N,SPHERE_N);
+    glPopMatrix();
+*/
 }
 
 void displayDefaultScene(void) {
@@ -125,7 +136,7 @@ void reshapeScene01(int w, int h)
     glViewport(0,0, (GLsizei) w, (GLsizei) h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(2.0*atan2(h/2.0,1000.0)*180.0/M_PI,(GLdouble)w/(GLdouble)h,100,1000);
+    gluPerspective(2.0*atan2(h/2.0,1000.0)*180.0/M_PI,(GLdouble)w/(GLdouble)h,100,2000);
     glMatrixMode(GL_MODELVIEW);
 }
 
