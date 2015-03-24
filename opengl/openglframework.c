@@ -40,7 +40,7 @@
 #include "glslshaders.h"
 #include "scene.h"
 #include "mesh.h"
-
+#include "texture.h"
 
 #define APERTURESAMPLES 8
 /* Globals galore */
@@ -59,6 +59,8 @@ float invApertureSamples = (float) 1 / APERTURESAMPLES;
 
 extern VBOData model;
 extern bool remove_duplicates;
+
+GLUquadric *quadric;
 
 void initDOFoffsetValues()
 {
@@ -245,6 +247,14 @@ int main(int argc, char** argv)
     glClearAccum(0.0,0.0,0.0,0.0);
     glEnable(GL_DEPTH_TEST);
 
+    /* Set texturing related variables */
+    quadric = gluNewQuadric();
+    gluQuadricDrawStyle(quadric, GLU_FILL);
+    gluQuadricOrientation(quadric, GLU_OUTSIDE);
+    gluQuadricNormals(quadric, GLU_SMOOTH);
+    gluQuadricTexture(quadric, GL_TRUE);
+    glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+
     /* Register GLUT callback functions */
     switch (scene) {
 	case DEFAULT_SCENE:
@@ -298,7 +308,7 @@ int main(int argc, char** argv)
         glShadeModel(GL_SMOOTH);
         glutReshapeFunc(reshapeMesh);
 
-		model = glmInitVBO(modelfile);
+		model = glmInitVBOTexture(modelfile, "earth.png");
         // Setup light
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
