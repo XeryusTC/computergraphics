@@ -61,7 +61,6 @@ extern VBOData model;
 extern bool remove_duplicates;
 
 GLUquadric *quadric;
-extern GLuint myTexture;
 
 void initDOFoffsetValues()
 {
@@ -242,8 +241,6 @@ int main(int argc, char** argv)
     gluQuadricTexture(quadric, GL_TRUE);
     glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 
-    myTexture = initTexture("earth.png");
-
     /* Register GLUT callback functions */
     switch (scene) {
 	case DEFAULT_SCENE:
@@ -280,7 +277,7 @@ int main(int argc, char** argv)
         glShadeModel(GL_SMOOTH);
         glutReshapeFunc(reshapeMesh);
 
-		model = glmInitVBO(modelfile);
+		model = glmInitVBOTexture(modelfile, "earth.png");
         // Setup light
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);

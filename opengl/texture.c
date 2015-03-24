@@ -13,8 +13,6 @@
 #include "lodepng.h"
 #include "texture.h"
 
-GLuint myTexture;
-
 GLuint initTexture(char *filename) {
     unsigned char *buffer, *image;
     size_t buffersize, imagesize;

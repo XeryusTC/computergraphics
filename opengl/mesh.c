@@ -14,8 +14,9 @@
 #include "input.h"
 #include "camera.h"
 #include "glm.h"
+#include "texture.h"
 
-#define USE_GLM_NOT_VBO
+//#define USE_GLM_NOT_VBO
 
 const int glfSize = sizeof(GLfloat);
 
@@ -32,8 +33,6 @@ GLfloat model_light_color[3] = {1.0, 1.0, 1.0};
 GLuint vboId;
 bool remove_duplicates=false;
 
-extern GLuint myTexture;
-
 void displayMesh(void)
 {
 	// Set rotation
@@ -48,15 +47,11 @@ void displayMesh(void)
 	glLightfv(GL_LIGHT0, GL_SPECULAR, model_light_color);
 
     // Setup texture
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    glBindTexture(GL_TEXTURE_2D, myTexture);
 #ifdef USE_GLM_NOT_VBO
     glmDraw(obj, GLM_TEXTURE);
 #else
     glmDrawVBO(&model);
 #endif
-    glDisable(GL_TEXTURE_2D);
 
     if (rotate_mode == MODE_FPS)
 		resetMousePosition();
@@ -92,6 +87,11 @@ void unloadModel(void)
 
 VBOData glmInitVBO(char *filename)
 {
+    return glmInitVBOTexture(filename, NULL);
+}
+
+VBOData glmInitVBOTexture(char *filename, char *texturefile)
+{
     int i;
 	VBOData d;
     // Destroy an old model if it is still loaded
@@ -103,15 +103,23 @@ VBOData glmInitVBO(char *filename)
 	// Start by creating a VBO
 	d = createVBOData(obj->numtriangles);
 
+    // Load the texture
+    if (texturefile != NULL) {
+        d.textureId = initTexture(texturefile);
+    }
+
 	// Convert triangles to VBOData
 	d.dataAvailable = true;
 	for (i=0; i<obj->numtriangles; ++i) {
 		insertUniqueVBOData(&d, &obj->vertices[obj->triangles[i].vindices[0] * 3],
-				&obj->normals[obj->triangles[i].nindices[0] * 3]);
+				&obj->normals[obj->triangles[i].nindices[0] * 3],
+                &obj->texcoords[obj->triangles[i].tindices[0] * 2]);
 		insertUniqueVBOData(&d, &obj->vertices[obj->triangles[i].vindices[1] * 3],
-				&obj->normals[obj->triangles[i].nindices[1] * 3]);
+				&obj->normals[obj->triangles[i].nindices[1] * 3],
+                &obj->texcoords[obj->triangles[i].tindices[1] * 2]);
 		insertUniqueVBOData(&d, &obj->vertices[obj->triangles[i].vindices[2] * 3],
-				&obj->normals[obj->triangles[i].nindices[2] * 3]);
+				&obj->normals[obj->triangles[i].nindices[2] * 3],
+                &obj->texcoords[obj->triangles[i].tindices[2] * 2]);
 	}
 
 	printf("Triangle count:    %d\n", obj->numtriangles);
@@ -134,6 +142,13 @@ void glmDrawVBO(VBOData *d)
     glNormalPointer(GL_FLOAT, 0, d->front * glfSize * 3);
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, 0);
+    if (d->textureId) {
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D, d->textureId);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glTexCoordPointer(2, GL_FLOAT, 0, d->front * glfSize * 3 * 2);
+    }
 
     if (remove_duplicates) {
         glDrawElements(GL_TRIANGLES, d->indexFront*3, GL_UNSIGNED_INT, 0);
@@ -143,6 +158,10 @@ void glmDrawVBO(VBOData *d)
 
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
+    if (d->textureId) {
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_TEXTURE_2D);
+    }
     glBindBufferARB(GL_ARRAY_BUFFER, 0);
 	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
@@ -158,6 +177,7 @@ VBOData createVBOData(int s)
 	d.v = malloc(s * glfSize * 3);
 	d.n = malloc(s * glfSize * 3);
 	d.i = malloc(s * sizeof(GLuint));
+    d.t = malloc(s * glfSize * 2);
 	assert(d.v != NULL);
 	assert(d.n != NULL);
 	assert(d.i != NULL);
@@ -174,9 +194,13 @@ void createVBOFromVBOData(VBOData *d)
 
 	bindVBOData(d);
 	// Copy data into the vertex buffer
-	glBufferData(GL_ARRAY_BUFFER, d->front*2*3*glfSize, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, d->front*3*glfSize+ // Vertex data
+            d->front*3*glfSize+ // Normal data
+            d->front*2*glfSize, // Texture coordinates
+            NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, d->front*3*glfSize, d->v);
 	glBufferSubData(GL_ARRAY_BUFFER, d->front*3*glfSize, d->front*3*glfSize, d->n);
+    glBufferSubData(GL_ARRAY_BUFFER, d->front*2*3*glfSize, d->front*2*glfSize, d->t);
 	// Copy data into the index buffer
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, d->indexFront*sizeof(GLuint), d->i, GL_STATIC_DRAW);
 
@@ -203,6 +227,7 @@ void freeVBOData(VBOData *d)
 		free(d->v);
 		free(d->n);
 		free(d->i);
+        free(d->t);
 		d->dataAvailable = false;
 	}
 }
@@ -212,8 +237,10 @@ void doubleVBODataSize(VBOData *d)
 	d->size *= 2;
 	d->v = realloc(d->v, d->size * glfSize * 3);
 	d->n = realloc(d->n, d->size * glfSize * 3);
+    d->t = realloc(d->t, d->size * glfSize * 2);
 	assert(d->n != NULL);
 	assert(d->v != NULL);
+    assert(d->t != NULL);
 }
 
 void doubleVBODataIndexSize(VBOData *d)
@@ -223,12 +250,13 @@ void doubleVBODataIndexSize(VBOData *d)
 	assert(d->i != NULL);
 }
 
-void insertVertexVBOData(VBOData *d, GLfloat *vertex, GLfloat *normal)
+void insertVertexVBOData(VBOData *d, GLfloat *vertex, GLfloat *normal, GLfloat *texcoord)
 {
 	if (d->front*3 >= d->size-3)
 		doubleVBODataSize(d);
 	memcpy(&d->v[d->front*3], vertex, 3*glfSize);
 	memcpy(&d->n[d->front*3], normal, 3*glfSize);
+    memcpy(&d->t[d->front*2], texcoord, 2*glfSize);
 	d->front++;
 }
 
@@ -239,20 +267,20 @@ void insertIndexVBOData(VBOData *d, GLuint index)
 	d->i[d->indexFront++] = index;
 }
 
-void insertUniqueVBOData(VBOData *d, GLfloat *vertex, GLfloat *normal)
+void insertUniqueVBOData(VBOData *d, GLfloat *vertex, GLfloat *normal, GLfloat *texcoord)
 {
 	d->dataAvailable = true;
 	if (remove_duplicates) {
 		GLuint index = vertexIsInVBOData(d, vertex, normal);
 		if (index == -1) {
 			insertIndexVBOData(d, d->front);
-			insertVertexVBOData(d, vertex, normal);
+			insertVertexVBOData(d, vertex, normal, texcoord);
 		} else {
 			insertIndexVBOData(d, index);
 		}
 	} else {
 		insertIndexVBOData(d, d->front);
-		insertVertexVBOData(d, vertex, normal);
+		insertVertexVBOData(d, vertex, normal, texcoord);
 	}
 }
 
