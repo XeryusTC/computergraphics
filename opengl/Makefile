@@ -7,7 +7,7 @@ CC = gcc -g -Wall
 UNAME=$(shell uname)
 
 EXECUTABLE = openglframework
-OBJS = openglframework.o camera.o input.o scene01.o glslshaders.o glm.o mesh.o
+OBJS = openglframework.o camera.o input.o scene01.o scene02.o glslshaders.o glm.o mesh.o
 
 ifeq ($(UNAME),Darwin)
 	LIBS = -lm -framework OpenGL -framework GLUT
@@ -32,7 +32,7 @@ clean:
 	- /bin/rm -f  *.bak *~ $(OBJS) $(EXECUTABLE) $(EXECUTABLE).exe
 
 make.dep:
-	$(CC) -MM $(OBJS:.o=.c) > make.dep
+	$(CC) -MM $(OBJS:.o=.c)> make.dep
 
 ### RULES
 

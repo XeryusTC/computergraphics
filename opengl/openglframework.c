@@ -84,6 +84,9 @@ void drawScene(SCENE scene)
 	case SCENE01:
 		displayScene01();
         break;
+	case SCENE02:
+		displayScene02();
+        break;
     case MESH:
 		displayMesh();
         break;
@@ -187,6 +190,13 @@ int main(int argc, char** argv)
                 aperatureRadius=10;
                 focalDistance=1000;
         }
+	else if (strcmp(argv[i], "-2")==0 || strcmp(argv[i], "--scene02")==0) {
+		scene = SCENE02;
+		screen.width=400;
+		screen.height=400;
+                aperatureRadius=10;
+                focalDistance=1000;
+        }
 	// Gooch Shading
 	else if (strcmp(argv[i], "-g")==0 || strcmp(argv[i], "--gooch")==0) {
 		fragShaderFileName = "fragment_GOOCH.glsl";
@@ -195,6 +205,10 @@ int main(int argc, char** argv)
         else if (strcmp(argv[i], "-d")==0 || strcmp(argv[i], "--dof")==0) {
                 initDOFoffsetValues();
                 dof = true;
+	}
+        // Fog
+        else if (strcmp(argv[i], "--fog")==0) {
+		fragShaderFileName = "fragment_FOG.glsl";
 	}
         // Meshes
         else if (strcmp(argv[i], "-m")==0 || strcmp(argv[i], "--mesh")==0) {
@@ -260,6 +274,23 @@ int main(int argc, char** argv)
 		cam.y = 200.0;
 		cam.z = 1000.0;
 		cam.pitch = 0.0;
+		cam.yaw = 180.0;
+		cam.roll = 0.0;
+		break;
+	case SCENE02:
+		initGLSLProgram("vertexshader.glsl", fragShaderFileName);
+    	        glShadeModel(GL_SMOOTH);
+		glutReshapeFunc(reshapeScene02);
+
+		// Setup light
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+
+		// Setup camera
+		cam.x = 200.0;
+		cam.y = 200.0;
+		cam.z = 1800.0;
+		cam.pitch = 30.0;
 		cam.yaw = 180.0;
 		cam.roll = 0.0;
 		break;
