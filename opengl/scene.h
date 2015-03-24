@@ -6,6 +6,7 @@ typedef enum SCENE {
 	SCENE01,
 	SCENE02,
     MESH,
+    BOUNCING_BALLS,
 } SCENE;
 
 void displayDefaultScene(void);

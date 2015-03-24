@@ -38,11 +38,11 @@ GLint vertexIsInVBOData(VBOData *d, GLfloat *vertex, GLfloat *normal);
 
 void displayMesh(void);
 void reshapeMesh(int w, int h);
-void loadModel(char *filename);
+void loadModel(char *filename, GLfloat scale);
 void unloadModel(void);
 
-VBOData glmInitVBO(char *filename);
-VBOData glmInitVBOTexture(char *filename, char *texturefile);
+VBOData glmInitVBO(char *filename, GLfloat scale);
+VBOData glmInitVBOTexture(char *filename, GLfloat scale, char *texturefile);
 void glmDrawVBO(VBOData *d);
 void glmDestroyVBO(void);
 

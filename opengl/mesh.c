@@ -49,7 +49,7 @@ void displayMesh(void)
 
     // Setup texture
 #ifdef USE_GLM_NOT_VBO
-    glmDraw(obj, GLM_TEXTURE);
+    glmDraw(obj, GLM_SMOOTH);
 #else
     glmDrawVBO(&model);
 #endif
@@ -69,7 +69,7 @@ void reshapeMesh(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
-void loadModel(char *filename)
+void loadModel(char *filename, GLfloat scale)
 {
     if (obj)
         unloadModel();
@@ -77,30 +77,28 @@ void loadModel(char *filename)
     glmFacetNormals(obj);
     glmVertexNormals(obj, 90.0);
     glmUnitize(obj);
-    glmScale(obj, 100.0);
+    glmScale(obj, scale);
     glmSpheremapTexture(obj);
 }
 
 void unloadModel(void)
 {
+    printf("Deleting model\n");
     glmDelete(obj);
 }
 
-VBOData glmInitVBO(char *filename)
+VBOData glmInitVBO(char *filename, GLfloat scale)
 {
-    return glmInitVBOTexture(filename, NULL);
+    return glmInitVBOTexture(filename, scale, NULL);
 }
 
-VBOData glmInitVBOTexture(char *filename, char *texturefile)
+VBOData glmInitVBOTexture(char *filename, GLfloat scale, char *texturefile)
 {
     int i;
     GLfloat texA[2], texB[2], texC[2];
 	VBOData d;
-    // Destroy an old model if it is still loaded
-    if (obj)
-		unloadModel();
 
-    loadModel(filename);
+    loadModel(filename, scale);
 
 	// Start by creating a VBO
 	d = createVBOData(obj->numtriangles);
@@ -135,11 +133,11 @@ VBOData glmInitVBOTexture(char *filename, char *texturefile)
                 texC);
 	}
 
-	printf("Triangle count:    %d\n", obj->numtriangles);
+	/*printf("Triangle count:    %d\n", obj->numtriangles);
 	printf("Normal count:      %d\n", obj->numnormals);
 	printf("Expected vertices: %d\n", obj->numtriangles*3);
 	printf("Actual vertices:   %d\n", d.front);
-	printf("Stored indices:    %d\n", d.indexFront);
+	printf("Stored indices:    %d\n", d.indexFront);*/
 
 	// Create the actual VBO
 	createVBOFromVBOData(&d);

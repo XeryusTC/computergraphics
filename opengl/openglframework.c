@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "animation.h"
 #include "bool.h"
 #include "camera.h"
 #include "input.h"
@@ -91,6 +92,9 @@ void drawScene(SCENE scene)
         break;
     case MESH:
 		displayMesh();
+        break;
+    case BOUNCING_BALLS:
+        displayBouncingBalls();
         break;
     }
 }
@@ -177,41 +181,42 @@ int main(int argc, char** argv)
     int  i;
     for (i=1; i<argc; ++i) {
         // Control modes
-	if (strcmp(argv[i], "-c")==0 || strcmp(argv[i], "--click")==0) {
-		rotate_mode = MODE_ROTATE_CLICK;
-	} else if (strcmp(argv[i], "-f")==0 || strcmp(argv[i], "--fps")==0) {
-		rotate_mode = MODE_FPS;
-	} else if (strcmp(argv[i], "-p")==0 || strcmp(argv[i], "--passive")==0) {
-		rotate_mode = MODE_ROTATE_PASSIVE;
-	}
-	// Scene
-	else if (strcmp(argv[i], "-1")==0 || strcmp(argv[i], "--scene01")==0) {
-		scene = SCENE01;
-		screen.width=400;
-		screen.height=400;
-                aperatureRadius=10;
-                focalDistance=1000;
+    	if (strcmp(argv[i], "-c")==0 || strcmp(argv[i], "--click")==0) {
+	    	rotate_mode = MODE_ROTATE_CLICK;
+    	} else if (strcmp(argv[i], "-f")==0 || strcmp(argv[i], "--fps")==0) {
+	    	rotate_mode = MODE_FPS;
+    	} else if (strcmp(argv[i], "-p")==0 || strcmp(argv[i], "--passive")==0) {
+	    	rotate_mode = MODE_ROTATE_PASSIVE;
+    	}
+	    // Scene
+    	else if (strcmp(argv[i], "-1")==0 || strcmp(argv[i], "--scene01")==0) {
+	    	scene = SCENE01;
+		    screen.width=400;
+    		screen.height=400;
+            aperatureRadius=10;
+            focalDistance=1000;
+        } else if (strcmp(argv[i], "-2")==0 || strcmp(argv[i], "--scene02")==0) {
+	    	scene = SCENE02;
+		    screen.width=400;
+    		screen.height=400;
+            aperatureRadius=10;
+            focalDistance=1000;
+        } else if (strcmp(argv[i], "-b")==0 || strcmp(argv[i], "--balls")==0) {
+            scene = BOUNCING_BALLS;
         }
-	else if (strcmp(argv[i], "-2")==0 || strcmp(argv[i], "--scene02")==0) {
-		scene = SCENE02;
-		screen.width=400;
-		screen.height=400;
-                aperatureRadius=10;
-                focalDistance=1000;
-        }
-	// Gooch Shading
-	else if (strcmp(argv[i], "-g")==0 || strcmp(argv[i], "--gooch")==0) {
-		fragShaderFileName = "fragment_GOOCH.glsl";
-	}
+    	// Gooch Shading
+	    else if (strcmp(argv[i], "-g")==0 || strcmp(argv[i], "--gooch")==0) {
+		    fragShaderFileName = "fragment_GOOCH.glsl";
+    	}
         // Depth Of Field
         else if (strcmp(argv[i], "-d")==0 || strcmp(argv[i], "--dof")==0) {
-                initDOFoffsetValues();
-                dof = true;
-	}
+            initDOFoffsetValues();
+            dof = true;
+    	}
         // Fog
         else if (strcmp(argv[i], "--fog")==0) {
-		fragShaderFileName = "fragment_FOG.glsl";
-	}
+	        fragShaderFileName = "fragment_FOG.glsl";
+    	}
         // Meshes
         else if (strcmp(argv[i], "-m")==0 || strcmp(argv[i], "--mesh")==0) {
             scene = MESH;
@@ -308,7 +313,7 @@ int main(int argc, char** argv)
         glShadeModel(GL_SMOOTH);
         glutReshapeFunc(reshapeMesh);
 
-		model = glmInitVBOTexture(modelfile, "earth.png");
+		model = glmInitVBOTexture(modelfile, 100.0, "earth.png");
         // Setup light
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
@@ -318,6 +323,22 @@ int main(int argc, char** argv)
         cam.y = 0.0;
         cam.z = 500.0;
         cam.pitch = 0.0;
+        cam.yaw = 180.0;
+        cam.roll = 0.0;
+        break;
+    case BOUNCING_BALLS:
+        initBouncingBalls();
+        glShadeModel(GL_SMOOTH);
+        glutReshapeFunc(reshapeBouncingBalls);
+        glutIdleFunc(idleBouncingBalls);
+
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+
+        cam.x = 0.0;
+        cam.y = 200.0;
+        cam.z = 900.0;
+        cam.pitch = 30.0;
         cam.yaw = 180.0;
         cam.roll = 0.0;
         break;
