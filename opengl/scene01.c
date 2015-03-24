@@ -39,6 +39,7 @@ extern ScreenInfo screen;
 extern Camera cam;
 extern CONTROL_MODE rotate_mode;
 extern float rotx, roty;
+extern GLUquadric *quadric;
 
 //Relative light coordinates to recreate GOOCH shading scene from raytracer:
 //GLfloat light_pos[4] = {-1200.0, 400.0, -600.0, 0.0};
@@ -73,31 +74,31 @@ void displayScene01(void) {
     setGlMaterial(0.0f,0.0f,1.0f,0.2,0.7,0.5,64);
     glPushMatrix();
     glTranslated(90,320,100);
-    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    gluSphere(quadric, 50,SPHERE_N,SPHERE_N);
     glPopMatrix();
 
     setGlMaterial(0.0f,1.0f,0.0f,0.2,0.3,0.5,8);
     glPushMatrix();
     glTranslated(210,270,300);
-    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    gluSphere(quadric, 50,SPHERE_N,SPHERE_N);
     glPopMatrix();
 
     setGlMaterial(1.0f,0.0f,0.0f,0.2,0.7,0.8,32);
     glPushMatrix();
     glTranslated(290,170,150);
-    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    gluSphere(quadric, 50,SPHERE_N,SPHERE_N);
     glPopMatrix();
 
     setGlMaterial(1.0f,0.8f,0.0f,0.2,0.8,0.0,1);
     glPushMatrix();
     glTranslated(140,220,400);
-    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    gluSphere(quadric, 50,SPHERE_N,SPHERE_N);
     glPopMatrix();
 
     setGlMaterial(1.0f,0.5f,0.0f,0.2,0.8,0.5,32);
     glPushMatrix();
     glTranslated(110,130,200);
-    glutSolidSphere(50,SPHERE_N,SPHERE_N);
+    gluSphere(quadric, 50,SPHERE_N,SPHERE_N);
     glPopMatrix();
 
     //Extra background sphere to recreate GOOCH shading scene from raytracer:

@@ -1230,7 +1230,7 @@ glmSpheremapTexture(GLMmodel* model)
     r = sqrt((x * x) + (y * y));
     rho = sqrt((r * r) + (z * z));
 
-    if(r == 0.0) {
+    /*if(r == 0.0) {
 	theta = 0.0;
 	phi = 0.0;
     } else {
@@ -1243,10 +1243,19 @@ glmSpheremapTexture(GLMmodel* model)
 	theta = 3.141592365 / 2.0;
       else
 	theta = asin(y / r) + (3.14159265 / 2.0);
+    }*/
+    if (r == 0.0) {
+        theta = 0.0;
+        phi = 0.0;
+    } else {
+        theta = acos(y / rho);
+        phi = atan2(z, x);
+        if (phi < 0.0)
+            phi += 2.0 * M_PI;
     }
 
-    model->texcoords[2 * i + 0] = theta / 3.14159265;
-    model->texcoords[2 * i + 1] = phi / 3.14159265;
+    model->texcoords[2 * i + 1] = theta / M_PI;
+    model->texcoords[2 * i + 0] = phi / (2.0 * M_PI);
   }
 
   /* go through and put texcoord indices in all the triangles */

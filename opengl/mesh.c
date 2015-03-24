@@ -15,6 +15,8 @@
 #include "camera.h"
 #include "glm.h"
 
+#define USE_GLM_NOT_VBO
+
 const int glfSize = sizeof(GLfloat);
 
 extern ScreenInfo screen;
@@ -30,6 +32,8 @@ GLfloat model_light_color[3] = {1.0, 1.0, 1.0};
 GLuint vboId;
 bool remove_duplicates=false;
 
+extern GLuint myTexture;
+
 void displayMesh(void)
 {
 	// Set rotation
@@ -43,7 +47,16 @@ void displayMesh(void)
 	glLightfv(GL_LIGHT0, GL_DIFFUSE,  model_light_color);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, model_light_color);
 
+    // Setup texture
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glBindTexture(GL_TEXTURE_2D, myTexture);
+#ifdef USE_GLM_NOT_VBO
+    glmDraw(obj, GLM_TEXTURE);
+#else
     glmDrawVBO(&model);
+#endif
+    glDisable(GL_TEXTURE_2D);
 
     if (rotate_mode == MODE_FPS)
 		resetMousePosition();
@@ -69,6 +82,7 @@ void loadModel(char *filename)
     glmVertexNormals(obj, 90.0);
     glmUnitize(obj);
     glmScale(obj, 100.0);
+    glmSpheremapTexture(obj);
 }
 
 void unloadModel(void)
