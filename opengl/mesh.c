@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "mesh.h"
 #include "input.h"
@@ -93,6 +94,7 @@ VBOData glmInitVBO(char *filename)
 VBOData glmInitVBOTexture(char *filename, char *texturefile)
 {
     int i;
+    GLfloat texA[2], texB[2], texC[2];
 	VBOData d;
     // Destroy an old model if it is still loaded
     if (obj)
@@ -111,15 +113,26 @@ VBOData glmInitVBOTexture(char *filename, char *texturefile)
 	// Convert triangles to VBOData
 	d.dataAvailable = true;
 	for (i=0; i<obj->numtriangles; ++i) {
-		insertUniqueVBOData(&d, &obj->vertices[obj->triangles[i].vindices[0] * 3],
+        // Fix texture coordinates around the seam
+        memcpy(&texA, &obj->texcoords[obj->triangles[i].tindices[0] * 2], glfSize*2);
+        memcpy(&texB, &obj->texcoords[obj->triangles[i].tindices[1] * 2], glfSize*2);
+        memcpy(&texC, &obj->texcoords[obj->triangles[i].tindices[2] * 2], glfSize*2);
+        if (texA[0] < 0.1 && (texB[0] > .9 || texC[0] > .9))
+            texA[0] += 1.0;
+        if (texB[0] < 0.1 && (texA[0] > .9 || texC[0] > .9))
+            texB[0] += 1.0;
+        if (texC[0] < 0.1 && (texA[0] > .9 || texB[0] > .9))
+            texC[0] += 1.0;
+
+        insertUniqueVBOData(&d, &obj->vertices[obj->triangles[i].vindices[0] * 3],
 				&obj->normals[obj->triangles[i].nindices[0] * 3],
-                &obj->texcoords[obj->triangles[i].tindices[0] * 2]);
+                texA);
 		insertUniqueVBOData(&d, &obj->vertices[obj->triangles[i].vindices[1] * 3],
 				&obj->normals[obj->triangles[i].nindices[1] * 3],
-                &obj->texcoords[obj->triangles[i].tindices[1] * 2]);
+                texB);
 		insertUniqueVBOData(&d, &obj->vertices[obj->triangles[i].vindices[2] * 3],
 				&obj->normals[obj->triangles[i].nindices[2] * 3],
-                &obj->texcoords[obj->triangles[i].tindices[2] * 2]);
+                texC);
 	}
 
 	printf("Triangle count:    %d\n", obj->numtriangles);
